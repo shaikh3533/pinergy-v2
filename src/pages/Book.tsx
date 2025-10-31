@@ -1,0 +1,645 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
+import { calculateBookingPriceSync } from '../utils/pricingCalculator';
+import { sendWhatsAppNotification } from '../utils/whatsappNotification';
+import { format, addDays } from 'date-fns';
+import {
+  generateTimeSlots,
+  getDayOfWeek,
+  getEndTime,
+  isWeekend,
+} from '../utils/timeSlots';
+import type { TimeSlot } from '../utils/timeSlots';
+
+interface SelectedSlot {
+  date: string;
+  time: string;
+  endTime: string;
+  dayOfWeek: string;
+}
+
+const Book = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  
+  // User info state
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [table, setTable] = useState('Table A'); // Display name
+  const [tableId, setTableId] = useState<'table_a' | 'table_b'>('table_a'); // Tibhar
+  const [coaching, setCoaching] = useState(false);
+  const [duration, setDuration] = useState<30 | 60>(60);
+  
+  // Date and slot selection
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
+  
+  // UI state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [bookingStep, setBookingStep] = useState<'details' | 'slots'>('details');
+
+  // Generate next 7 days
+  const next7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(new Date(), i);
+    return {
+      date: format(date, 'yyyy-MM-dd'),
+      displayDate: format(date, 'MMM dd'),
+      dayName: format(date, 'EEE'),
+      dayOfWeek: getDayOfWeek(date),
+      isToday: i === 0,
+    };
+  });
+
+  // Update available time slots when date or duration changes
+  useEffect(() => {
+    if (selectedDate) {
+      const dateObj = new Date(selectedDate);
+      const slots = generateTimeSlots(dateObj);
+      setAvailableTimeSlots(slots);
+    }
+  }, [selectedDate, duration]);
+
+  // Auto-select first date
+  useEffect(() => {
+    if (!selectedDate && next7Days.length > 0) {
+      setSelectedDate(next7Days[0].date);
+    }
+  }, []);
+
+  const handleSlotToggle = (slot: TimeSlot) => {
+    const existingSlotIndex = selectedSlots.findIndex(
+      s => s.date === selectedDate && s.time === slot.value
+    );
+
+    if (existingSlotIndex >= 0) {
+      // Remove slot
+      setSelectedSlots(selectedSlots.filter((_, i) => i !== existingSlotIndex));
+    } else {
+      // Add slot
+      const endTime = getEndTime(slot.value, duration);
+      const dayOfWeek = getDayOfWeek(new Date(selectedDate));
+      setSelectedSlots([
+        ...selectedSlots,
+        {
+          date: selectedDate,
+          time: slot.value,
+          endTime,
+          dayOfWeek,
+        },
+      ]);
+    }
+  };
+
+  const isSlotSelected = (slotValue: string) => {
+    return selectedSlots.some(
+      s => s.date === selectedDate && s.time === slotValue
+    );
+  };
+
+  const getTotalPrice = () => {
+    const pricePerSlot = calculateBookingPriceSync(tableId, duration, coaching);
+    return pricePerSlot * selectedSlots.length;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (bookingStep === 'details') {
+      // Validate user details
+      if (!name || !phone) {
+        setError('Please fill in required fields');
+        return;
+      }
+      setBookingStep('slots');
+      return;
+    }
+
+    // Step 2: Submit bookings
+    if (selectedSlots.length === 0) {
+      setError('Please select at least one time slot');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      // If user is not logged in, create a guest user first
+      let userId = user?.id;
+      
+      if (!userId) {
+        const { data: guestUser, error: userError } = await supabase
+          .from('users')
+          .insert({
+            name,
+            email: email || null,
+            phone: phone || null,
+            rating_points: 0,
+            level: 'Noob',
+            total_hours_played: 0,
+            approved: true,
+            role: 'player',
+          })
+          .select()
+          .single();
+
+        if (userError) throw userError;
+        userId = guestUser.id;
+      }
+
+      // Create all bookings
+      const bookings = selectedSlots.map(slot => ({
+        user_id: userId,
+        table_type: table,
+        table_id: tableId,
+        slot_duration: duration,
+        coaching: coaching,
+        date: slot.date,
+        start_time: slot.time,
+        end_time: slot.endTime,
+        day_of_week: slot.dayOfWeek,
+        price: calculateBookingPriceSync(tableId, duration, coaching),
+        whatsapp_sent: false,
+      }));
+
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert(bookings);
+
+      if (bookingError) throw bookingError;
+
+      // Update total hours played
+      const totalHours = (duration / 60) * selectedSlots.length;
+      await supabase.rpc('increment_hours_played', {
+        user_id: userId,
+        hours: totalHours,
+      });
+
+      // Send WhatsApp notifications for each booking
+      for (const slot of selectedSlots) {
+        await sendWhatsAppNotification({
+          name,
+          phone,
+          table,
+          duration,
+          date: slot.date,
+          startTime: slot.time,
+          endTime: slot.endTime,
+          dayOfWeek: slot.dayOfWeek,
+          coaching,
+        });
+      }
+
+      setSuccess(true);
+      
+      // Redirect after 4 seconds
+      setTimeout(() => {
+        if (user) {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 4000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="card max-w-2xl w-full"
+        >
+          <div className="text-center mb-6">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-3xl font-bold text-white mb-2">
+              {selectedSlots.length} Slot{selectedSlots.length > 1 ? 's' : ''} Booked Successfully!
+            </h2>
+            <p className="text-gray-400">
+              Admin has been notified about your booking
+            </p>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            {selectedSlots.map((slot, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gray-800 rounded-lg p-4 grid grid-cols-2 gap-2 text-sm"
+              >
+                <div>
+                  <span className="text-gray-400">Date:</span>
+                  <span className="text-white ml-2">{slot.date} ({slot.dayOfWeek})</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Time:</span>
+                  <span className="text-white ml-2">{slot.time} - {slot.endTime}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="bg-gray-800 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Table:</span>
+              <span className="text-white">{table}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Duration per slot:</span>
+              <span className="text-white">{duration} minutes</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Coaching:</span>
+              <span className="text-white">{coaching ? 'Yes' : 'No'}</span>
+            </div>
+            <div className="flex justify-between border-t border-gray-700 pt-2">
+              <span className="text-gray-400 font-semibold">Total Price:</span>
+              <span className="text-white font-bold text-xl">PKR {getTotalPrice()}</span>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-500 text-center mt-6">
+            See you at SPINERGY! 🏓
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">Book Your Slots</h1>
+            <p className="text-gray-400">Select multiple slots for the next 7 days</p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="flex justify-center items-center gap-4 mb-8">
+            <div className={`flex items-center gap-2 ${bookingStep === 'details' ? 'text-primary-blue' : 'text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bookingStep === 'details' ? 'bg-primary-blue text-white' : 'bg-gray-700'}`}>
+                1
+              </div>
+              <span className="font-semibold">Your Details</span>
+            </div>
+            <div className="w-16 h-1 bg-gray-700"></div>
+            <div className={`flex items-center gap-2 ${bookingStep === 'slots' ? 'text-primary-blue' : 'text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bookingStep === 'slots' ? 'bg-primary-blue text-white' : 'bg-gray-700'}`}>
+                2
+              </div>
+              <span className="font-semibold">Select Slots</span>
+            </div>
+          </div>
+
+          {/* Club Timings Info */}
+          <div className="card mb-6 bg-gradient-to-r from-primary-blue/10 to-primary-red/10 border-primary-blue">
+            <h3 className="text-lg font-bold text-white mb-3">🕐 Club Timings</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="text-primary-blue font-semibold mb-1">Monday - Friday</div>
+                <div className="text-gray-300">2:00 PM to 2:00 AM</div>
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="text-primary-red font-semibold mb-1">Saturday - Sunday</div>
+                <div className="text-gray-300">12:00 PM to 3:00 AM</div>
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <AnimatePresence mode="wait">
+              {bookingStep === 'details' ? (
+                <motion.div
+                  key="details"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="card space-y-6"
+                >
+                  <h2 className="text-2xl font-bold text-white mb-4">Step 1: Your Details</h2>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="label">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="input-field"
+                        placeholder="Ahmed Ali"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="label">
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="input-field"
+                        placeholder="03XX XXXXXXX"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="label">Email (Optional)</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-field"
+                      placeholder="your.email@example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      Select Table <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => { setTable('Table A'); setTableId('table_a'); }}
+                        className={`p-4 rounded-lg border-2 transition text-left ${
+                          tableId === 'table_a'
+                            ? 'border-primary-blue bg-primary-blue/10 text-white'
+                            : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="font-bold text-lg mb-1">Table A</div>
+                        <div className="text-sm">Tibhar (25mm ITTF Approved)</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setTable('Table B'); setTableId('table_b'); }}
+                        className={`p-4 rounded-lg border-2 transition text-left ${
+                          tableId === 'table_b'
+                            ? 'border-primary-blue bg-primary-blue/10 text-white'
+                            : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="font-bold text-lg mb-1">Table B</div>
+                        <div className="text-sm">DC-700 (25mm Professional)</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      Slot Duration <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setDuration(30)}
+                        className={`p-4 rounded-lg border-2 transition ${
+                          duration === 30
+                            ? 'border-primary-blue bg-primary-blue/10 text-white'
+                            : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="text-2xl font-bold">30 min</div>
+                        <div className="text-sm">PKR 250/slot</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDuration(60)}
+                        className={`p-4 rounded-lg border-2 transition ${
+                          duration === 60
+                            ? 'border-primary-blue bg-primary-blue/10 text-white'
+                            : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="text-2xl font-bold">60 min</div>
+                        <div className="text-sm">PKR 500/slot</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={coaching}
+                        onChange={(e) => setCoaching(e.target.checked)}
+                        className="w-5 h-5 rounded border-gray-700 text-primary-blue focus:ring-primary-blue"
+                      />
+                      <span className="text-white">
+                        Add Coaching (+PKR {duration === 30 ? '500' : '1000'}/slot) 👨‍🏫
+                      </span>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-primary w-full text-lg"
+                  >
+                    Continue to Slot Selection →
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="slots"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-white">Step 2: Select Time Slots</h2>
+                    <button
+                      type="button"
+                      onClick={() => setBookingStep('details')}
+                      className="text-primary-blue hover:underline text-sm"
+                    >
+                      ← Back to Details
+                    </button>
+                  </div>
+
+                  {/* Date Tabs */}
+                  <div className="card">
+                    <h3 className="text-lg font-semibold text-white mb-4">Select Date</h3>
+                    <div className="grid grid-cols-7 gap-2">
+                      {next7Days.map((day) => (
+                        <button
+                          key={day.date}
+                          type="button"
+                          onClick={() => setSelectedDate(day.date)}
+                          className={`p-3 rounded-lg border-2 transition ${
+                            selectedDate === day.date
+                              ? 'border-primary-blue bg-primary-blue/20 text-white'
+                              : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                          }`}
+                        >
+                          <div className="text-xs font-semibold mb-1">{day.dayName}</div>
+                          <div className="text-sm">{day.displayDate}</div>
+                          {day.isToday && (
+                            <div className="text-xs text-primary-blue mt-1">Today</div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Time Slots */}
+                  {selectedDate && (
+                    <div className="card">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">
+                          Available Time Slots - {next7Days.find(d => d.date === selectedDate)?.dayOfWeek}
+                        </h3>
+                        <div className="text-sm text-gray-400">
+                          {isWeekend(new Date(selectedDate)) ? '12 PM - 3 AM' : '2 PM - 2 AM'}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        {availableTimeSlots.map((slot) => {
+                          const selected = isSlotSelected(slot.value);
+                          return (
+                            <motion.button
+                              key={slot.value}
+                              type="button"
+                              onClick={() => handleSlotToggle(slot)}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`p-3 rounded-lg border-2 transition ${
+                                selected
+                                  ? 'border-primary-blue bg-primary-blue/20 text-white shadow-lg shadow-primary-blue/20'
+                                  : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
+                              }`}
+                            >
+                              <div className="font-semibold text-sm">{slot.label}</div>
+                              {selected && (
+                                <div className="text-xs text-primary-blue mt-1">✓ Selected</div>
+                              )}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Selected Slots Summary */}
+                  {selectedSlots.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="card bg-gradient-to-r from-primary-blue/10 to-primary-red/10 border-primary-blue"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-white">
+                          Selected Slots ({selectedSlots.length})
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSlots([])}
+                          className="text-red-500 hover:text-red-400 text-sm"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-3 mb-4">
+                        {selectedSlots.map((slot, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-800/50 rounded-lg p-3 flex items-center justify-between"
+                          >
+                            <div className="text-sm">
+                              <div className="text-white font-semibold">
+                                {slot.time} - {slot.endTime}
+                              </div>
+                              <div className="text-gray-400">
+                                {slot.date} ({slot.dayOfWeek})
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSlots(selectedSlots.filter((_, i) => i !== index))}
+                              className="text-red-500 hover:text-red-400"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-gray-800 rounded-lg p-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Price per slot:</span>
+                          <span className="text-white">PKR {calculateBookingPriceSync(tableId, duration, coaching)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Number of slots:</span>
+                          <span className="text-white">{selectedSlots.length}</span>
+                        </div>
+                        <div className="flex justify-between border-t border-gray-700 pt-2">
+                          <span className="text-white font-bold text-lg">Total Price:</span>
+                          <span className="text-white font-bold text-2xl">PKR {getTotalPrice()}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || selectedSlots.length === 0}
+                    className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Booking...' : `Confirm ${selectedSlots.length} Booking${selectedSlots.length > 1 ? 's' : ''}`}
+                  </button>
+                  
+                  <p className="text-xs text-gray-500 text-center -mt-2">
+                    Admin will be notified via WhatsApp automatically
+                  </p>
+
+                  <p className="text-sm text-gray-500 text-center">
+                    By booking, you agree to our terms and conditions
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Book;
