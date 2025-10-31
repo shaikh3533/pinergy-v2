@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { motion } from 'framer-motion';
+import logoImage from '../../assets/primary white variant logo.jpeg';
 
 const Navbar = () => {
   const { user, isAdmin, signOut } = useAuthStore();
@@ -21,7 +22,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3">
             <img 
-              src="/src/assets/primary white variant logo.jpeg" 
+              src={logoImage} 
               alt="SPINERGY Logo" 
               className="h-12 w-auto"
             />

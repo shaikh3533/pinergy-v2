@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import logoImage from '../assets/primary white variant logo.jpeg';
+import tibharImage from '../assets/tibhar.png';
+import dc700Image from '../assets/dc-700.png';
 
 const Home = () => {
   return (
@@ -32,7 +35,7 @@ const Home = () => {
             className="mb-6"
           >
             <img 
-              src="/src/assets/primary white variant logo.jpeg" 
+              src={logoImage} 
               alt="SPINERGY Logo" 
               className="h-32 w-auto mx-auto"
             />
@@ -144,7 +147,7 @@ const Home = () => {
             >
               <div className="bg-gradient-to-br from-primary-blue to-blue-900 h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-2">
                 <img 
-                  src="/src/assets/tibhar.png" 
+                  src={tibharImage} 
                   alt="Tibhar Table" 
                   className="w-full h-full object-contain"
                 />
@@ -170,7 +173,7 @@ const Home = () => {
             >
               <div className="bg-gradient-to-br from-primary-red to-red-900 h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-2">
                 <img 
-                  src="/src/assets/dc-700.png" 
+                  src={dc700Image} 
                   alt="DC-700 Table" 
                   className="w-full h-full object-contain"
                 />

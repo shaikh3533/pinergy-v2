@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logoImage from '../../assets/primary white variant logo.jpeg';
 
 const Footer = () => {
   return (
@@ -8,7 +9,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-3 mb-4">
               <img 
-                src="/src/assets/primary white variant logo.jpeg" 
+                src={logoImage} 
                 alt="SPINERGY Logo" 
                 className="h-12 w-auto"
               />
