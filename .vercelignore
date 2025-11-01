@@ -1,0 +1,35 @@
+# Documentation
+docs/
+*.md
+
+# Database scripts
+database/
+*.sql
+
+# Backend examples
+backend/
+
+# Development files
+.git/
+.gitignore
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+.cache/
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
