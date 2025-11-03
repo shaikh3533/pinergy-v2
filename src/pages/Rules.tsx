@@ -1,6 +1,34 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { fetchPricingRules } from '../utils/pricingCalculator';
+import type { PricingRule } from '../lib/supabase';
 
 const Rules = () => {
+  const [pricing, setPricing] = useState<PricingRule[]>([]);
+  const [loadingPricing, setLoadingPricing] = useState(true);
+
+  useEffect(() => {
+    const loadPricing = async () => {
+      try {
+        const rules = await fetchPricingRules();
+        setPricing(rules);
+      } catch (error) {
+        console.error('Error loading pricing:', error);
+      } finally {
+        setLoadingPricing(false);
+      }
+    };
+    loadPricing();
+  }, []);
+
+  // Helper functions to get pricing
+  const getPrice = (table: string, duration: number, coaching: boolean) => {
+    const rule = pricing.find(
+      r => r.table_type === table && r.duration_minutes === duration && r.coaching === coaching
+    );
+    return rule?.price || 0;
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -147,25 +175,94 @@ const Rules = () => {
           {/* Pricing */}
           <div className="card mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">💰 Pricing (PKR)</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-2">Table Rental</h3>
-                <ul className="space-y-2 text-gray-300">
-                  <li>30 minutes: <span className="text-primary-blue font-bold">PKR 250</span></li>
-                  <li>60 minutes: <span className="text-primary-blue font-bold">PKR 500</span></li>
-                </ul>
+            {loadingPricing ? (
+              <div className="text-center text-gray-400 py-8">
+                Loading pricing information...
               </div>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-2">Coaching (Optional)</h3>
-                <ul className="space-y-2 text-gray-300">
-                  <li>30 minutes: <span className="text-primary-red font-bold">+PKR 500</span></li>
-                  <li>60 minutes: <span className="text-primary-red font-bold">+PKR 1000</span></li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-green-900/20 border border-green-600 rounded-lg text-green-400 text-sm">
-              💡 <strong>Note:</strong> Payment can be made in cash at the club
-            </div>
+            ) : (
+              <>
+                <div className="grid md:grid-cols-2 gap-6 mb-4">
+                  <div className="bg-gradient-to-br from-primary-blue/20 to-blue-900/20 border border-primary-blue/30 rounded-lg p-5">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <span>🏓</span> Table A (Tibhar)
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">30 minutes</span>
+                          <span className="text-primary-blue font-bold text-lg">PKR {getPrice('table_a', 30, false)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">Without coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">30 min + Coaching</span>
+                          <span className="text-primary-red font-bold text-lg">PKR {getPrice('table_a', 30, true)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">+PKR {getPrice('table_a', 30, true) - getPrice('table_a', 30, false)} for coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">60 minutes</span>
+                          <span className="text-primary-blue font-bold text-lg">PKR {getPrice('table_a', 60, false)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">Without coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">60 min + Coaching</span>
+                          <span className="text-primary-red font-bold text-lg">PKR {getPrice('table_a', 60, true)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">+PKR {getPrice('table_a', 60, true) - getPrice('table_a', 60, false)} for coaching</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-red-900/20 to-primary-red/20 border border-primary-red/30 rounded-lg p-5">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <span>🏓</span> Table B (DC-700)
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">30 minutes</span>
+                          <span className="text-primary-blue font-bold text-lg">PKR {getPrice('table_b', 30, false)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">Without coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">30 min + Coaching</span>
+                          <span className="text-primary-red font-bold text-lg">PKR {getPrice('table_b', 30, true)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">+PKR {getPrice('table_b', 30, true) - getPrice('table_b', 30, false)} for coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">60 minutes</span>
+                          <span className="text-primary-blue font-bold text-lg">PKR {getPrice('table_b', 60, false)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">Without coaching</div>
+                      </div>
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-gray-300">60 min + Coaching</span>
+                          <span className="text-primary-red font-bold text-lg">PKR {getPrice('table_b', 60, true)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">+PKR {getPrice('table_b', 60, true) - getPrice('table_b', 60, false)} for coaching</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-blue-900/20 border border-blue-600 rounded-lg p-3 mb-4 text-blue-400 text-sm">
+                  <strong>ℹ️ Note:</strong> All prices are dynamically managed by the admin. Check the booking page for the latest pricing.
+                </div>
+                <div className="p-3 bg-green-900/20 border border-green-600 rounded-lg text-green-400 text-sm">
+                  💡 <strong>Payment:</strong> Payment can be made in cash at the club
+                </div>
+              </>
+            )}
           </div>
 
           {/* Club Rules */}

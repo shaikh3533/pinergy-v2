@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
-import { calculateBookingPriceSync } from '../utils/pricingCalculator';
+import { calculateBookingPrice, calculateBookingPriceSync, fetchPricingRules } from '../utils/pricingCalculator';
 import { sendWhatsAppNotification } from '../utils/whatsappNotification';
 import { format, addDays } from 'date-fns';
 import {
@@ -13,6 +13,7 @@ import {
   isWeekend,
 } from '../utils/timeSlots';
 import type { TimeSlot } from '../utils/timeSlots';
+import type { Booking } from '../lib/supabase';
 
 interface SelectedSlot {
   date: string;
@@ -38,6 +39,12 @@ const Book = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<Booking[]>([]); // Track booked slots
+  const [fetchingSlots, setFetchingSlots] = useState(false);
+  
+  // Pricing state
+  const [pricingLoaded, setPricingLoaded] = useState(false);
+  const [pricePerSlot, setPricePerSlot] = useState(0);
   
   // UI state
   const [loading, setLoading] = useState(false);
@@ -57,6 +64,53 @@ const Book = () => {
     };
   });
 
+  // Initialize pricing on component load
+  useEffect(() => {
+    const initializePricing = async () => {
+      await fetchPricingRules();
+      setPricingLoaded(true);
+    };
+    initializePricing();
+  }, []);
+
+  // Update price when table/duration/coaching changes
+  useEffect(() => {
+    const updatePrice = async () => {
+      const price = await calculateBookingPrice(tableId, duration, coaching);
+      setPricePerSlot(price);
+    };
+    if (pricingLoaded) {
+      updatePrice();
+    }
+  }, [tableId, duration, coaching, pricingLoaded]);
+
+  // Fetch booked slots for selected date and table
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      if (!selectedDate || !tableId) return;
+      
+      setFetchingSlots(true);
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('date', selectedDate)
+          .eq('table_id', tableId)
+          .eq('slot_duration', duration);
+
+        if (error) throw error;
+        setBookedSlots(data || []);
+      } catch (err) {
+        console.error('Error fetching booked slots:', err);
+        setBookedSlots([]);
+      } finally {
+        setFetchingSlots(false);
+      }
+    };
+
+    fetchBookedSlots();
+  }, [selectedDate, tableId, duration]);
+
   // Update available time slots when date or duration changes
   useEffect(() => {
     if (selectedDate) {
@@ -73,7 +127,21 @@ const Book = () => {
     }
   }, []);
 
+  // Check if a slot is already booked
+  const isSlotBooked = (slotValue: string) => {
+    return bookedSlots.some(
+      booking => booking.start_time === slotValue
+    );
+  };
+
   const handleSlotToggle = (slot: TimeSlot) => {
+    // Prevent selecting already booked slots
+    if (isSlotBooked(slot.value)) {
+      setError('This slot is already booked. Please select another slot.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
     const existingSlotIndex = selectedSlots.findIndex(
       s => s.date === selectedDate && s.time === slot.value
     );
@@ -104,7 +172,6 @@ const Book = () => {
   };
 
   const getTotalPrice = () => {
-    const pricePerSlot = calculateBookingPriceSync(tableId, duration, coaching);
     return pricePerSlot * selectedSlots.length;
   };
 
@@ -165,7 +232,7 @@ const Book = () => {
         start_time: slot.time,
         end_time: slot.endTime,
         day_of_week: slot.dayOfWeek,
-        price: calculateBookingPriceSync(tableId, duration, coaching),
+        price: pricePerSlot, // Use dynamic price
         whatsapp_sent: false,
       }));
 
@@ -426,27 +493,41 @@ const Book = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => setDuration(30)}
+                        onClick={async () => {
+                          setDuration(30);
+                        }}
                         className={`p-4 rounded-lg border-2 transition ${
                           duration === 30
                             ? 'border-primary-blue bg-primary-blue/10 text-white'
                             : 'border-gray-700 text-gray-400 hover:border-gray-600'
                         }`}
+                        disabled={!pricingLoaded}
                       >
                         <div className="text-2xl font-bold">30 min</div>
-                        <div className="text-sm">PKR 250/slot</div>
+                        <div className="text-sm">
+                          {pricingLoaded 
+                            ? `PKR ${calculateBookingPriceSync(tableId, 30, false)}/slot` 
+                            : 'Loading...'}
+                        </div>
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDuration(60)}
+                        onClick={async () => {
+                          setDuration(60);
+                        }}
                         className={`p-4 rounded-lg border-2 transition ${
                           duration === 60
                             ? 'border-primary-blue bg-primary-blue/10 text-white'
                             : 'border-gray-700 text-gray-400 hover:border-gray-600'
                         }`}
+                        disabled={!pricingLoaded}
                       >
                         <div className="text-2xl font-bold">60 min</div>
-                        <div className="text-sm">PKR 500/slot</div>
+                        <div className="text-sm">
+                          {pricingLoaded 
+                            ? `PKR ${calculateBookingPriceSync(tableId, 60, false)}/slot` 
+                            : 'Loading...'}
+                        </div>
                       </button>
                     </div>
                   </div>
@@ -458,9 +539,16 @@ const Book = () => {
                         checked={coaching}
                         onChange={(e) => setCoaching(e.target.checked)}
                         className="w-5 h-5 rounded border-gray-700 text-primary-blue focus:ring-primary-blue"
+                        disabled={!pricingLoaded}
                       />
                       <span className="text-white">
-                        Add Coaching (+PKR {duration === 30 ? '500' : '1000'}/slot) 👨‍🏫
+                        {pricingLoaded ? (
+                          <>
+                            Add Coaching (+PKR {calculateBookingPriceSync(tableId, duration, true) - calculateBookingPriceSync(tableId, duration, false)}/slot) 👨‍🏫
+                          </>
+                        ) : (
+                          'Add Coaching (Loading...) 👨‍🏫'
+                        )}
                       </span>
                     </label>
                   </div>
@@ -529,23 +617,35 @@ const Book = () => {
                       </div>
                       
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        {availableTimeSlots.map((slot) => {
+                        {fetchingSlots && (
+                          <div className="col-span-full text-center text-gray-400 py-4">
+                            Loading available slots...
+                          </div>
+                        )}
+                        {!fetchingSlots && availableTimeSlots.map((slot) => {
                           const selected = isSlotSelected(slot.value);
+                          const booked = isSlotBooked(slot.value);
                           return (
                             <motion.button
                               key={slot.value}
                               type="button"
                               onClick={() => handleSlotToggle(slot)}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
+                              whileHover={!booked ? { scale: 1.05 } : {}}
+                              whileTap={!booked ? { scale: 0.95 } : {}}
+                              disabled={booked}
                               className={`p-3 rounded-lg border-2 transition ${
-                                selected
+                                booked
+                                  ? 'border-red-900 bg-red-900/20 text-red-400 cursor-not-allowed opacity-50'
+                                  : selected
                                   ? 'border-primary-blue bg-primary-blue/20 text-white shadow-lg shadow-primary-blue/20'
                                   : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
                               }`}
                             >
                               <div className="font-semibold text-sm">{slot.label}</div>
-                              {selected && (
+                              {booked && (
+                                <div className="text-xs text-red-400 mt-1">✗ Booked</div>
+                              )}
+                              {!booked && selected && (
                                 <div className="text-xs text-primary-blue mt-1">✓ Selected</div>
                               )}
                             </motion.button>
@@ -603,7 +703,7 @@ const Book = () => {
                       <div className="bg-gray-800 rounded-lg p-4 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">Price per slot:</span>
-                          <span className="text-white">PKR {calculateBookingPriceSync(tableId, duration, coaching)}</span>
+                          <span className="text-white">PKR {pricePerSlot}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">Number of slots:</span>
