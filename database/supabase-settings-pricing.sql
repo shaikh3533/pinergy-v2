@@ -114,19 +114,20 @@ ON CONFLICT (table_id) DO UPDATE SET
   specs = EXCLUDED.specs;
 
 -- Step 7: Insert default pricing rules (in PKR)
+-- Updated pricing: Table A (1000/hr, 500/30min), Table B (800/hr, 400/30min)
 INSERT INTO pricing_rules (table_type, duration_minutes, coaching, price) VALUES
   -- Table A (Tibhar) - Half Hour
-  ('table_a', 30, false, 400),
-  ('table_a', 30, true, 600),
+  ('table_a', 30, false, 500),
+  ('table_a', 30, true, 700),  -- 500 + 200 coaching
   -- Table A (Tibhar) - Full Hour
-  ('table_a', 60, false, 700),
-  ('table_a', 60, true, 1100),
+  ('table_a', 60, false, 1000),
+  ('table_a', 60, true, 1200),  -- 1000 + 200 coaching
   -- Table B (DC-700) - Half Hour
-  ('table_b', 30, false, 350),
-  ('table_b', 30, true, 550),
+  ('table_b', 30, false, 400),
+  ('table_b', 30, true, 600),  -- 400 + 200 coaching
   -- Table B (DC-700) - Full Hour
-  ('table_b', 60, false, 600),
-  ('table_b', 60, true, 1000)
+  ('table_b', 60, false, 800),
+  ('table_b', 60, true, 1000)  -- 800 + 200 coaching
 ON CONFLICT (table_type, duration_minutes, coaching) DO UPDATE SET
   price = EXCLUDED.price;
 

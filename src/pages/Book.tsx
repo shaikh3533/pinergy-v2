@@ -32,7 +32,8 @@ const Book = () => {
   const [phone, setPhone] = useState(user?.phone || '');
   const [table, setTable] = useState('Table A'); // Display name
   const [tableId, setTableId] = useState<'table_a' | 'table_b'>('table_a'); // Tibhar
-  const [coaching, setCoaching] = useState(false);
+  // const [coaching, setCoaching] = useState(false); // COACHING FEATURE - COMMENTED OUT FOR NOW
+  const coaching = false; // Temporarily hardcoded to false until coaching feature is implemented
   const [duration, setDuration] = useState<30 | 60>(60);
   
   // Date and slot selection
@@ -532,7 +533,8 @@ const Book = () => {
                     </div>
                   </div>
 
-                  <div>
+                  {/* COACHING FEATURE - COMMENTED OUT FOR NOW (TO BE IMPLEMENTED LATER) */}
+                  {/* <div>
                     <label className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -551,7 +553,7 @@ const Book = () => {
                         )}
                       </span>
                     </label>
-                  </div>
+                  </div> */}
 
                   <button
                     type="submit"

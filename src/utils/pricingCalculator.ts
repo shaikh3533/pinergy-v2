@@ -33,14 +33,15 @@ export const fetchPricingRules = async (): Promise<PricingRule[]> => {
 };
 
 // Fallback default pricing (in case database is unavailable)
+// Updated pricing: Table A (1000/hr, 500/30min), Table B (800/hr, 400/30min)
 const getDefaultPricingRules = (): PricingRule[] => [
-  { id: '1', table_type: 'table_a', duration_minutes: 30, coaching: false, price: 400, active: true, created_at: '', updated_at: '' },
-  { id: '2', table_type: 'table_a', duration_minutes: 30, coaching: true, price: 600, active: true, created_at: '', updated_at: '' },
-  { id: '3', table_type: 'table_a', duration_minutes: 60, coaching: false, price: 700, active: true, created_at: '', updated_at: '' },
-  { id: '4', table_type: 'table_a', duration_minutes: 60, coaching: true, price: 1100, active: true, created_at: '', updated_at: '' },
-  { id: '5', table_type: 'table_b', duration_minutes: 30, coaching: false, price: 350, active: true, created_at: '', updated_at: '' },
-  { id: '6', table_type: 'table_b', duration_minutes: 30, coaching: true, price: 550, active: true, created_at: '', updated_at: '' },
-  { id: '7', table_type: 'table_b', duration_minutes: 60, coaching: false, price: 600, active: true, created_at: '', updated_at: '' },
+  { id: '1', table_type: 'table_a', duration_minutes: 30, coaching: false, price: 500, active: true, created_at: '', updated_at: '' },
+  { id: '2', table_type: 'table_a', duration_minutes: 30, coaching: true, price: 700, active: true, created_at: '', updated_at: '' },
+  { id: '3', table_type: 'table_a', duration_minutes: 60, coaching: false, price: 1000, active: true, created_at: '', updated_at: '' },
+  { id: '4', table_type: 'table_a', duration_minutes: 60, coaching: true, price: 1200, active: true, created_at: '', updated_at: '' },
+  { id: '5', table_type: 'table_b', duration_minutes: 30, coaching: false, price: 400, active: true, created_at: '', updated_at: '' },
+  { id: '6', table_type: 'table_b', duration_minutes: 30, coaching: true, price: 600, active: true, created_at: '', updated_at: '' },
+  { id: '7', table_type: 'table_b', duration_minutes: 60, coaching: false, price: 800, active: true, created_at: '', updated_at: '' },
   { id: '8', table_type: 'table_b', duration_minutes: 60, coaching: true, price: 1000, active: true, created_at: '', updated_at: '' },
 ];
 

@@ -526,3 +526,5 @@ CREATE INDEX idx_bookings_date_table_duration ON bookings(date, table_id, slot_d
 
 **All issues resolved! Your slots are dynamic and bookings are safe!** 🚀🏓
 
+
+
