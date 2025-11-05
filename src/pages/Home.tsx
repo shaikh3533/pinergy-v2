@@ -180,7 +180,7 @@ const Home = () => {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Table B - DC-700</h3>
               <p className="text-gray-400 mb-4">
-                Double Circle DC-600 Professional 25mm ITTF-approved table
+                Double Circle DC-700 Professional 25mm ITTF-approved table
               </p>
               <ul className="space-y-2 text-gray-300 text-sm">
                 <li>✓ Table Size: 2740mm × 1525mm × 760mm</li>

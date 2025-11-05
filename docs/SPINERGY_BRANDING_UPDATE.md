@@ -115,10 +115,10 @@ Your SmashZone app has been completely rebranded to **SPINERGY** with your custo
 
 ## 🎯 Table Specifications Summary
 
-### Table A - DC-700 (Double Circle DC-600 Professional)
+### Table A - DC-700 (Double Circle DC-700 Professional)
 
 **Full Specifications:**
-- **Model**: DC-600 Professional
+- **Model**: DC-700 Professional
 - **Art No**: dc-1007
 - **Table Size**: 2740mm × 1525mm × 760mm
 - **Top Thickness**: 25mm

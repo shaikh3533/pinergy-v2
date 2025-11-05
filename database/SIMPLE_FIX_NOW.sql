@@ -18,7 +18,19 @@ ALTER TABLE table_names DISABLE ROW LEVEL SECURITY;
 ALTER TABLE club_settings DISABLE ROW LEVEL SECURITY;
 
 -- ================================================================
--- STEP 2: UPDATE PRICING RULES
+-- STEP 2: FIX TABLE TYPE CHECK CONSTRAINT
+-- ================================================================
+
+-- Drop old constraint and add new one (accepts lowercase values)
+ALTER TABLE bookings 
+DROP CONSTRAINT IF EXISTS bookings_table_type_check;
+
+ALTER TABLE bookings 
+ADD CONSTRAINT bookings_table_type_check 
+CHECK (table_type IN ('table_a', 'table_b'));
+
+-- ================================================================
+-- STEP 3: UPDATE PRICING RULES
 -- ================================================================
 
 -- Table A (Tibhar): 500 PKR/30min, 1000 PKR/hour
@@ -49,7 +61,7 @@ UPDATE pricing_rules SET price = 1000
 WHERE table_type = 'table_b' AND duration_minutes = 60 AND coaching = true;
 
 -- ================================================================
--- STEP 3: UPDATE ADMIN PHONE
+-- STEP 4: UPDATE ADMIN PHONE
 -- ================================================================
 
 UPDATE club_settings 

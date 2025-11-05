@@ -263,7 +263,7 @@ const Book = () => {
       // Create all bookings
       const bookings = selectedSlots.map(slot => ({
         user_id: userId,
-        table_type: table,
+        table_type: tableId, // Use tableId (lowercase) not table (display name)
         table_id: tableId,
         slot_duration: duration,
         coaching: coaching,
@@ -387,7 +387,15 @@ const Book = () => {
         }
       }, 4000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create bookings');
+      console.error('❌ Booking error:', err);
+      const errorMessage = err.message || 'Failed to create bookings';
+      setError(errorMessage);
+      
+      // Show error toast
+      toast.error(`Booking failed: ${errorMessage}`, {
+        duration: 5000,
+        icon: '❌',
+      });
     } finally {
       setLoading(false);
     }
