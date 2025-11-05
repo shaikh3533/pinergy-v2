@@ -21,23 +21,30 @@ export const sendAdminWhatsAppNotification = async (
   booking: BookingNotification
 ): Promise<void> => {
   // Format admin WhatsApp message
-  let message = `🏓 *SPINERGY - New Booking Alert*\n\n` +
-    `👤 Player: *${booking.name}*\n` +
-    `📱 Phone: ${booking.phone || 'Not provided'}\n` +
-    `🎯 Table: *${booking.table}*\n` +
-    `📅 Date: ${booking.date} (${booking.dayOfWeek})\n` +
-    `⏰ Time: *${booking.startTime} - ${booking.endTime}*\n` +
-    `⏱️ Duration: ${booking.duration} minutes\n`;
+  let message = `🎯 *SPINERGY TABLE BOOKING*\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  message += `📋 *BOOKING DETAILS*\n\n`;
+  message += `👤 *Customer Name:*\n   ${booking.name}\n\n`;
+  message += `📞 *Contact Number:*\n   ${booking.phone || 'Not provided'}\n\n`;
+  message += `🏓 *Table Reserved:*\n   ${booking.table}\n\n`;
+  message += `📅 *Date:*\n   ${booking.date} (${booking.dayOfWeek})\n\n`;
+  message += `⏰ *Time Slot:*\n   ${booking.startTime} - ${booking.endTime}\n\n`;
+  message += `⏱️ *Duration:*\n   ${booking.duration} minutes\n\n`;
   
   if (booking.totalSlots && booking.totalSlots > 1) {
-    message += `🎫 Total Slots: ${booking.totalSlots}\n`;
+    message += `🎫 *Total Slots Booked:*\n   ${booking.totalSlots}\n\n`;
   }
   
   if (booking.totalPrice) {
-    message += `💰 Total Amount: *PKR ${booking.totalPrice}*\n`;
+    message += `💰 *TOTAL PAYMENT:*\n   *PKR ${booking.totalPrice}*\n\n`;
   }
   
-  message += `\n_New booking received! Please check admin dashboard._`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `📍 *Location:* Suny Park, Lahore\n`;
+  message += `🌐 *System:* Spinergy Booking Portal\n\n`;
+  message += `✅ *ACTION REQUIRED:*\n`;
+  message += `Please confirm with customer and prepare the table.\n\n`;
+  message += `_This is an automated notification from your booking system._`;
 
   try {
     // Admin phone number (SPINERGY company number)
@@ -109,22 +116,31 @@ export const sendCustomerWhatsAppNotification = async (
   }
 
   // Format customer WhatsApp message
-  let message = `✅ *Booking Confirmed - SPINERGY*\n\n` +
-    `Hi *${booking.name}*! 👋\n\n` +
-    `Your table booking has been confirmed:\n\n` +
-    `🎯 Table: *${booking.table}*\n` +
-    `📅 Date: ${booking.date} (${booking.dayOfWeek})\n` +
-    `⏰ Time: *${booking.startTime} - ${booking.endTime}*\n` +
-    `⏱️ Duration: ${booking.duration} minutes\n`;
+  let message = `✅ *BOOKING CONFIRMED*\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  message += `Dear *${booking.name}*,\n\n`;
+  message += `Thank you for choosing SPINERGY! Your table tennis booking has been successfully confirmed.\n\n`;
+  message += `📋 *YOUR BOOKING DETAILS*\n\n`;
+  message += `🏓 *Table:* ${booking.table}\n`;
+  message += `📅 *Date:* ${booking.date} (${booking.dayOfWeek})\n`;
+  message += `⏰ *Time:* ${booking.startTime} - ${booking.endTime}\n`;
+  message += `⏱️ *Duration:* ${booking.duration} minutes\n`;
   
   if (booking.totalPrice) {
-    message += `💰 Total Amount: *PKR ${booking.totalPrice}*\n`;
+    message += `💰 *Amount:* PKR ${booking.totalPrice}\n`;
   }
   
-  message += `\n📍 *Location:* Suny Park, Lahore\n` +
-    `📞 *Contact:* 03413393533\n\n` +
-    `⚠️ *Important:* Please arrive 5 minutes before your slot time.\n\n` +
-    `_See you at SPINERGY! 🏓_`;
+  message += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `📍 *VENUE*\n`;
+  message += `Suny Park, Lahore, Punjab\n\n`;
+  message += `📞 *CONTACT*\n`;
+  message += `+92 341 3393533\n\n`;
+  message += `⚠️ *IMPORTANT NOTES*\n`;
+  message += `• Please arrive 5 minutes before your slot\n`;
+  message += `• Bring your own equipment or rent from us\n`;
+  message += `• Payment due upon arrival\n\n`;
+  message += `🏓 _We look forward to seeing you at SPINERGY!_\n\n`;
+  message += `_This is an automated confirmation from Spinergy Booking System._`;
 
   try {
     console.log('📤 Customer WhatsApp Notification Prepared:', message);
