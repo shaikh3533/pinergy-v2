@@ -18,13 +18,23 @@ ALTER TABLE table_names DISABLE ROW LEVEL SECURITY;
 ALTER TABLE club_settings DISABLE ROW LEVEL SECURITY;
 
 -- ================================================================
--- STEP 2: FIX TABLE TYPE CHECK CONSTRAINT
+-- STEP 2: FIX EXISTING DATA + TABLE TYPE CHECK CONSTRAINT
 -- ================================================================
 
--- Drop old constraint and add new one (accepts lowercase values)
+-- Drop old constraint first (so we can update existing data)
 ALTER TABLE bookings 
 DROP CONSTRAINT IF EXISTS bookings_table_type_check;
 
+-- Fix existing bookings with wrong table_type values
+UPDATE bookings 
+SET table_type = 'table_a' 
+WHERE table_type ILIKE '%table%a%' OR table_type = 'Table A' OR table_type = 'TABLE_A';
+
+UPDATE bookings 
+SET table_type = 'table_b' 
+WHERE table_type ILIKE '%table%b%' OR table_type = 'Table B' OR table_type = 'TABLE_B';
+
+-- Now add new constraint (after data is fixed)
 ALTER TABLE bookings 
 ADD CONSTRAINT bookings_table_type_check 
 CHECK (table_type IN ('table_a', 'table_b'));

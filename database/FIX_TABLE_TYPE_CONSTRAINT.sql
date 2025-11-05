@@ -9,7 +9,16 @@
 ALTER TABLE bookings 
 DROP CONSTRAINT IF EXISTS bookings_table_type_check;
 
--- STEP 2: Add new check constraint (accepts lowercase values)
+-- STEP 2: Fix existing data first
+UPDATE bookings 
+SET table_type = 'table_a' 
+WHERE table_type ILIKE '%table%a%' OR table_type = 'Table A' OR table_type = 'TABLE_A';
+
+UPDATE bookings 
+SET table_type = 'table_b' 
+WHERE table_type ILIKE '%table%b%' OR table_type = 'Table B' OR table_type = 'TABLE_B';
+
+-- STEP 3: Add new check constraint (accepts lowercase values)
 ALTER TABLE bookings 
 ADD CONSTRAINT bookings_table_type_check 
 CHECK (table_type IN ('table_a', 'table_b'));
