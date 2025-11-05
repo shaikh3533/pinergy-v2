@@ -40,21 +40,27 @@ BEGIN
   -- Drop unique constraints if they exist
   IF EXISTS (
     SELECT 1 FROM pg_constraint 
-    WHERE conname = 'users_email_key'
+    WHERE conname = 'users_email_key' 
+    AND conrelid = 'users'::regclass
   ) THEN
     ALTER TABLE users DROP CONSTRAINT users_email_key;
     RAISE NOTICE '✅ Dropped unique constraint on email';
+  ELSE
+    RAISE NOTICE '✅ Email constraint already removed or does not exist';
   END IF;
   
   IF EXISTS (
     SELECT 1 FROM pg_constraint 
     WHERE conname = 'users_phone_key'
+    AND conrelid = 'users'::regclass
   ) THEN
     ALTER TABLE users DROP CONSTRAINT users_phone_key;
     RAISE NOTICE '✅ Dropped unique constraint on phone';
+  ELSE
+    RAISE NOTICE '✅ Phone constraint already removed or does not exist';
   END IF;
   
-  RAISE NOTICE '✅ Step 2: Email/Phone constraints updated (allows guest bookings)';
+  RAISE NOTICE '✅ Step 2: Email/Phone constraints checked (allows guest bookings)';
 END $$;
 
 -- ================================================================
