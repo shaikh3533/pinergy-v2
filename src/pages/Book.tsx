@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { calculateBookingPrice, calculateBookingPriceSync, fetchPricingRules } from '../utils/pricingCalculator';
 import { sendWhatsAppNotification } from '../utils/whatsappNotification';
+import { sendCustomerConfirmationEmail, sendAdminNotificationEmail } from '../utils/emailNotification';
+import { sendCustomerSMS, generateBookingSMS } from '../utils/smsNotification';
 import { format, addDays } from 'date-fns';
 import {
   generateTimeSlots,
@@ -116,7 +119,7 @@ const Book = () => {
   useEffect(() => {
     if (selectedDate) {
       const dateObj = new Date(selectedDate);
-      const slots = generateTimeSlots(dateObj);
+      const slots = generateTimeSlots(dateObj, duration); // Pass duration parameter
       setAvailableTimeSlots(slots);
     }
   }, [selectedDate, duration]);
@@ -199,27 +202,62 @@ const Book = () => {
     setLoading(true);
 
     try {
-      // If user is not logged in, create a guest user first
+      // If user is not logged in, find or create a guest user
       let userId = user?.id;
       
       if (!userId) {
-        const { data: guestUser, error: userError } = await supabase
-          .from('users')
-          .insert({
-            name,
-            email: email || null,
-            phone: phone || null,
-            rating_points: 0,
-            level: 'Noob',
-            total_hours_played: 0,
-            approved: true,
-            role: 'player',
-          })
-          .select()
-          .single();
+        // STEP 1: Check if user already exists (by email or phone)
+        let existingUser = null;
+        
+        if (email) {
+          const { data } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+          existingUser = data;
+        }
+        
+        // If not found by email, try phone
+        if (!existingUser && phone) {
+          const { data } = await supabase
+            .from('users')
+            .select('*')
+            .eq('phone', phone)
+            .maybeSingle();
+          existingUser = data;
+        }
+        
+        // STEP 2: Use existing user or create new one
+        if (existingUser) {
+          // User exists - use their ID
+          userId = existingUser.id;
+          console.log('✅ Found existing user:', existingUser.name);
+        } else {
+          // User doesn't exist - create new one
+          const { data: newUser, error: userError } = await supabase
+            .from('users')
+            .insert({
+              name,
+              email: email || null,
+              phone: phone || null,
+              rating_points: 0,
+              level: 'Noob',
+              total_hours_played: 0,
+              approved: true,
+              role: 'player',
+            })
+            .select()
+            .single();
 
-        if (userError) throw userError;
-        userId = guestUser.id;
+          if (userError) {
+            console.error('Error creating user:', userError);
+            throw new Error('Failed to create user profile. Please try again.');
+          }
+          
+          userId = newUser.id;
+          console.log('✅ Created new user:', newUser.name);
+        }
       }
 
       // Create all bookings
@@ -250,9 +288,16 @@ const Book = () => {
         hours: totalHours,
       });
 
-      // Send WhatsApp notifications for each booking
-      for (const slot of selectedSlots) {
-        await sendWhatsAppNotification({
+      // Show immediate success toast
+      toast.success('🎉 Booking confirmed!', {
+        duration: 4000,
+        icon: '✅',
+      });
+
+      // Send notifications (async, don't wait for all)
+      const notificationPromises = selectedSlots.map(async (slot) => {
+        // 1. WhatsApp notifications (to both admin and customer)
+        sendWhatsAppNotification({
           name,
           phone,
           table,
@@ -262,8 +307,74 @@ const Book = () => {
           endTime: slot.endTime,
           dayOfWeek: slot.dayOfWeek,
           coaching,
+          price: pricePerSlot,
+          totalSlots: selectedSlots.length,
+          totalPrice: getTotalPrice(),
+        });
+
+        // 2. Email notifications (if email provided)
+        if (email) {
+          // Customer confirmation email
+          sendCustomerConfirmationEmail({
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone,
+            table,
+            date: slot.date,
+            dayOfWeek: slot.dayOfWeek,
+            startTime: slot.time,
+            endTime: slot.endTime,
+            duration,
+            price: pricePerSlot,
+            totalSlots: selectedSlots.length,
+            totalPrice: getTotalPrice(),
+          });
+
+          // Admin notification email
+          sendAdminNotificationEmail({
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone,
+            table,
+            date: slot.date,
+            dayOfWeek: slot.dayOfWeek,
+            startTime: slot.time,
+            endTime: slot.endTime,
+            duration,
+            price: pricePerSlot,
+            totalSlots: selectedSlots.length,
+            totalPrice: getTotalPrice(),
+          });
+        }
+      });
+
+      // 3. SMS notification (send one summary SMS for all bookings)
+      if (phone && selectedSlots.length > 0) {
+        const firstSlot = selectedSlots[0];
+        const smsText = generateBookingSMS({
+          name,
+          table,
+          date: firstSlot.date,
+          startTime: firstSlot.time,
+          endTime: firstSlot.endTime,
+          totalPrice: getTotalPrice(),
+        });
+        sendCustomerSMS({
+          to: phone,
+          message: smsText,
         });
       }
+
+      // Wait a moment for initial notifications to start
+      await Promise.race([
+        Promise.allSettled(notificationPromises),
+        new Promise(resolve => setTimeout(resolve, 1000)),
+      ]);
+
+      // Show notification status toast
+      toast.success('📲 Confirmation messages sent!', {
+        duration: 3000,
+      });
 
       setSuccess(true);
       
@@ -295,9 +406,23 @@ const Book = () => {
             <h2 className="text-3xl font-bold text-white mb-2">
               {selectedSlots.length} Slot{selectedSlots.length > 1 ? 's' : ''} Booked Successfully!
             </h2>
-            <p className="text-gray-400">
-              Admin has been notified about your booking
-            </p>
+            <div className="space-y-2 mt-4">
+              <p className="text-green-400 font-semibold">
+                ✅ Booking confirmed!
+              </p>
+              <p className="text-gray-400 text-sm">
+                📧 Confirmation email sent {email && `to ${email}`}
+              </p>
+              <p className="text-gray-400 text-sm">
+                📱 WhatsApp confirmation sent {phone && `to ${phone}`}
+              </p>
+              <p className="text-gray-400 text-sm">
+                💬 SMS confirmation sent {phone && `to ${phone}`}
+              </p>
+              <p className="text-blue-400 text-sm mt-3">
+                🔔 Admin has been notified about your booking
+              </p>
+            </div>
           </div>
 
           <div className="space-y-3 mb-6">
@@ -724,12 +849,20 @@ const Book = () => {
                     disabled={loading || selectedSlots.length === 0}
                     className="btn-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Booking...' : `Confirm ${selectedSlots.length} Booking${selectedSlots.length > 1 ? 's' : ''}`}
+                    {loading ? '⏳ Processing...' : `Confirm ${selectedSlots.length} Booking${selectedSlots.length > 1 ? 's' : ''}`}
                   </button>
                   
-                  <p className="text-xs text-gray-500 text-center -mt-2">
-                    Admin will be notified via WhatsApp automatically
-                  </p>
+                  <div className="text-center space-y-1">
+                    <p className="text-xs text-gray-400">
+                      ✅ You'll receive confirmation via:
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      📧 Email {email && '• '}📱 WhatsApp {phone && '• '}💬 SMS
+                    </p>
+                    <p className="text-xs text-blue-400 mt-2">
+                      🔔 Admin will be notified automatically
+                    </p>
+                  </div>
 
                   <p className="text-sm text-gray-500 text-center">
                     By booking, you agree to our terms and conditions

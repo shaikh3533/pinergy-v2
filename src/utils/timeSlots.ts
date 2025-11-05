@@ -40,7 +40,7 @@ export const getEndTime = (startTime: string, duration: 30 | 60): string => {
   return addMinutesToTime(startTime, duration);
 };
 
-export const generateTimeSlots = (date: Date): TimeSlot[] => {
+export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   const isWeekendDay = isWeekend(date);
   
@@ -54,6 +54,9 @@ export const generateTimeSlots = (date: Date): TimeSlot[] => {
   let currentMinutes = startHour * 60; // Convert to minutes
   const endMinutes = endHour * 60;
   
+  // Interval based on duration: 30 mins for half-hour, 60 mins for full hour
+  const interval = duration;
+  
   while (currentMinutes < endMinutes) {
     const hours = Math.floor(currentMinutes / 60);
     const mins = currentMinutes % 60;
@@ -65,13 +68,17 @@ export const generateTimeSlots = (date: Date): TimeSlot[] => {
     const time12 = formatTime12Hour(time24);
     const nextDay = hours >= 24 ? ' (Next Day)' : '';
     
+    // Calculate and show end time for the slot
+    const endTime = getEndTime(time24, duration);
+    const endTime12 = formatTime12Hour(endTime);
+    
     slots.push({
       value: time24,
-      label: `${time12}${nextDay}`,
+      label: `${time12} - ${endTime12}${nextDay}`,
       displayTime: time12,
     });
     
-    currentMinutes += 30; // 30-minute intervals
+    currentMinutes += interval; // Interval matches duration
   }
   
   return slots;
