@@ -316,7 +316,7 @@ Send multiple WhatsApp messages at once.
 {
   "messages": [
     {
-      "to": "+923411111111",
+      "to": "+923251111111",
       "message": "Message 1"
     },
     {

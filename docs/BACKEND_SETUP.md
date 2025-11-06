@@ -105,7 +105,7 @@ npm i -g vercel
   "env": {
     "WHATSAPP_TOKEN": "@whatsapp-token",
     "PHONE_NUMBER_ID": "@phone-number-id",
-    "ADMIN_PHONE": "923413393533"
+    "ADMIN_PHONE": "923259898900"
   }
 }
 ```

@@ -103,7 +103,7 @@ Services like WATI, Interakt, Aisensy, CallMeBot
 
 1. Click **"Phone Numbers"** in WhatsApp settings
 2. Click **"Add Phone Number"**
-3. Enter: **+92 341 3393533**
+3. Enter: **+92 325 9898900**
 4. Verify via SMS/Call
 5. This becomes your **sender number**
 

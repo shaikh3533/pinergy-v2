@@ -74,7 +74,7 @@ Thank you for choosing SPINERGY! Your table tennis booking has been successfully
 Suny Park, Lahore, Punjab
 
 📞 *CONTACT*
-+92 341 3393533
++92 325 9898900
 
 ⚠️ *IMPORTANT NOTES*
 • Please arrive 5 minutes before your slot

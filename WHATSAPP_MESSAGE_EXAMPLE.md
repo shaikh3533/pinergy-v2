@@ -47,7 +47,7 @@ _New booking received! Please check admin dashboard._
 ## 📱 Admin WhatsApp Details
 
 **Phone Number:** 03259898900  
-**International Format:** +92 341 3393533  
+**International Format:** +92 325 9898900  
 **WhatsApp Format:** 923259898900
 
 ---
@@ -70,7 +70,7 @@ Here's a real example from your test booking:
 🏓 *SPINERGY - New Booking Alert*
 
 👤 Player: *Ham*
-📱 Phone: 034133932334
+📱 Phone: 03259898900
 🎯 Table: *Table B*
 📅 Date: 2025-11-05 (Wednesday)
 ⏰ Time: *14:00 - 15:00*
