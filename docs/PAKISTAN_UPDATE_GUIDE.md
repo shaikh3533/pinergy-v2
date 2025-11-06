@@ -102,7 +102,7 @@ Time slots available in **30-minute intervals**.
 ### How It Works:
 1. User books a slot
 2. WhatsApp message auto-opens with booking details
-3. Message pre-filled to send to: **0341-3393533**
+3. Message pre-filled to send to: **0325-9898900**
 4. User clicks send (requires WhatsApp installed)
 
 ### Message Format:
@@ -122,7 +122,7 @@ Booking confirmed! See you at SmashZone! 🏓
 
 ### WhatsApp Group:
 - Group Link: https://chat.whatsapp.com/JCxLLXGZMSrBjoMSmpBq8m
-- Admin Number: 0341-3393533
+- Admin Number: 0325-9898900
 
 ---
 
@@ -159,8 +159,8 @@ New features:
 
 ### Contact Information
 - **Email**: info@smashzone.pk, bookings@smashzone.pk
-- **Phone**: 0341-3393533
-- **WhatsApp**: 0341-3393533
+- **Phone**: 0325-9898900
+- **WhatsApp**: 0325-9898900
 - **Location**: DHA Phase 5, Lahore, Sindh, Pakistan
 
 ### Sample Player Names
@@ -267,7 +267,7 @@ WHERE id = 'USER_UUID_HERE';
 
 ### Contact Details
 - **Email**: info@smashzone.pk
-- **WhatsApp**: 0341-3393533
+- **WhatsApp**: 0325-9898900
 - **Location**: DHA Phase 5, Lahore
 
 ### For Developers

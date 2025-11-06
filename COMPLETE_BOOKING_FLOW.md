@@ -125,7 +125,7 @@ Total Amount: PKR 1000
 
 📍 Location: Suny Park, Lahore, Punjab
 📱 Phone: 03413393533
-📧 Email: info@spinergy.pk
+📧 Email: spinergy.info@gmail.com
 
 ---
 Thank you for choosing SPINERGY!

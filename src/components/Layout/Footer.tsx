@@ -64,8 +64,8 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li>📧 info@spinergy.pk</li>
-              <li>📱 0341-3393533</li>
+              <li>📧 spinergy.info@gmail.com</li>
+              <li>📱 0325-9898900</li>
               <li>📍 Suny Park, Lahore</li>
             </ul>
           </div>

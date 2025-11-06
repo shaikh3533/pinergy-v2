@@ -92,7 +92,7 @@ const Contact = () => {
                     <h3 className="text-xl font-semibold text-white mb-2">Phone</h3>
                     <p className="text-gray-400">
                       <a href="tel:+923413393533" className="hover:text-white transition">
-                        0341-3393533
+                        0325-9898900
                       </a>
                       <br />
                       <a href="https://wa.me/923413393533" className="hover:text-white transition" target="_blank" rel="noopener noreferrer">
@@ -128,8 +128,8 @@ const Contact = () => {
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">Email</h3>
                     <p className="text-gray-400">
-                      <a href="mailto:info@spinergy.pk" className="hover:text-white transition">
-                        info@spinergy.pk
+                      <a href="mailto:spinergy.info@gmail.com" className="hover:text-white transition">
+                        spinergy.info@gmail.com
                       </a>
                       <br />
                       <a href="mailto:bookings@spinergy.pk" className="hover:text-white transition">

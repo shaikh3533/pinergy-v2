@@ -757,35 +757,37 @@ const Book = () => {
                             Loading available slots...
                           </div>
                         )}
-                        {!fetchingSlots && availableTimeSlots.map((slot) => {
-                          const selected = isSlotSelected(slot.value);
-                          const booked = isSlotBooked(slot.value);
-                          return (
-                            <motion.button
-                              key={slot.value}
-                              type="button"
-                              onClick={() => handleSlotToggle(slot)}
-                              whileHover={!booked ? { scale: 1.05 } : {}}
-                              whileTap={!booked ? { scale: 0.95 } : {}}
-                              disabled={booked}
-                              className={`p-3 rounded-lg border-2 transition ${
-                                booked
-                                  ? 'border-red-900 bg-red-900/20 text-red-400 cursor-not-allowed opacity-50'
-                                  : selected
-                                  ? 'border-primary-blue bg-primary-blue/20 text-white shadow-lg shadow-primary-blue/20'
-                                  : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
-                              }`}
-                            >
-                              <div className="font-semibold text-sm">{slot.label}</div>
-                              {booked && (
-                                <div className="text-xs text-red-400 mt-1">✗ Booked</div>
-                              )}
-                              {!booked && selected && (
-                                <div className="text-xs text-primary-blue mt-1">✓ Selected</div>
-                              )}
-                            </motion.button>
-                          );
-                        })}
+                        {!fetchingSlots && availableTimeSlots
+                          .filter(slot => !isSlotBooked(slot.value)) // Only show available slots
+                          .map((slot) => {
+                            const selected = isSlotSelected(slot.value);
+                            return (
+                              <motion.button
+                                key={slot.value}
+                                type="button"
+                                onClick={() => handleSlotToggle(slot)}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`p-3 rounded-lg border-2 transition ${
+                                  selected
+                                    ? 'border-primary-blue bg-primary-blue/20 text-white shadow-lg shadow-primary-blue/20'
+                                    : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
+                                }`}
+                              >
+                                <div className="font-semibold text-sm">{slot.label}</div>
+                                {selected && (
+                                  <div className="text-xs text-primary-blue mt-1">✓ Selected</div>
+                                )}
+                              </motion.button>
+                            );
+                          })}
+                        {!fetchingSlots && availableTimeSlots.filter(slot => !isSlotBooked(slot.value)).length === 0 && (
+                          <div className="col-span-full text-center text-gray-400 py-8">
+                            <div className="text-4xl mb-2">😔</div>
+                            <div className="text-lg font-semibold mb-1">No Available Slots</div>
+                            <div className="text-sm">All slots for this date and table are booked. Please try another date or table.</div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

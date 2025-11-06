@@ -233,7 +233,7 @@ export const generateCustomerEmailHTML = (data: BookingEmailData): string => {
             <td style="padding: 0 20px 30px 20px; text-align: center;">
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">📍 <strong>Location:</strong> Suny Park, Lahore, Punjab</p>
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">📱 <strong>Phone:</strong> 03413393533</p>
-              <p style="margin: 0; color: #666; font-size: 14px;">📧 <strong>Email:</strong> info@spinergy.pk</p>
+              <p style="margin: 0; color: #666; font-size: 14px;">📧 <strong>Email:</strong> spinergy.info@gmail.com</p>
             </td>
           </tr>
 

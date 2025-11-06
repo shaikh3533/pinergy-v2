@@ -228,13 +228,13 @@ const Suggestions = () => {
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
               <div className="text-3xl mb-2">📧</div>
               <div className="text-sm text-gray-400">Email</div>
-              <div className="text-white font-semibold">info@spinergy.pk</div>
+              <div className="text-white font-semibold">spinergy.info@gmail.com</div>
             </div>
             
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
               <div className="text-3xl mb-2">📱</div>
               <div className="text-sm text-gray-400">WhatsApp</div>
-              <div className="text-white font-semibold">0341-3393533</div>
+              <div className="text-white font-semibold">0325-9898900</div>
             </div>
             
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
