@@ -11,6 +11,12 @@ export interface BookingNotification {
   price?: number;
   totalSlots?: number;
   totalPrice?: number;
+  allSlots?: Array<{
+    date: string;
+    time: string;
+    endTime: string;
+    dayOfWeek: string;
+  }>;
 }
 
 /**
@@ -28,12 +34,20 @@ export const sendAdminWhatsAppNotification = async (
   message += `📞 *Contact Number:*\n   ${booking.phone || 'Not provided'}\n\n`;
   message += `🏓 *Table Reserved:*\n   ${booking.table}\n\n`;
   message += `📅 *Date:*\n   ${booking.date} (${booking.dayOfWeek})\n\n`;
-  message += `⏰ *Time Slot:*\n   ${booking.startTime} - ${booking.endTime}\n\n`;
-  message += `⏱️ *Duration:*\n   ${booking.duration} minutes\n\n`;
   
-  if (booking.totalSlots && booking.totalSlots > 1) {
-    message += `🎫 *Total Slots Booked:*\n   ${booking.totalSlots}\n\n`;
+  // Show all time slots if multiple slots are booked
+  if (booking.allSlots && booking.allSlots.length > 1) {
+    message += `⏰ *Time Slots Booked:*\n`;
+    booking.allSlots.forEach((slot, index) => {
+      message += `   ${index + 1}. ${slot.time} - ${slot.endTime}\n`;
+    });
+    message += `\n`;
+    message += `🎫 *Total Slots:* ${booking.totalSlots}\n\n`;
+  } else {
+    message += `⏰ *Time Slot:*\n   ${booking.startTime} - ${booking.endTime}\n\n`;
   }
+  
+  message += `⏱️ *Duration per Slot:*\n   ${booking.duration} minutes\n\n`;
   
   if (booking.totalPrice) {
     message += `💰 *TOTAL PAYMENT:*\n   *PKR ${booking.totalPrice}*\n\n`;

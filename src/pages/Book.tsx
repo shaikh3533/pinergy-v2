@@ -294,25 +294,26 @@ const Book = () => {
         icon: '✅',
       });
 
-      // Send notifications (async, don't wait for all)
-      const notificationPromises = selectedSlots.map(async (slot) => {
-        // 1. WhatsApp notifications (to both admin and customer)
-        sendWhatsAppNotification({
-          name,
-          phone,
-          table,
-          duration,
-          date: slot.date,
-          startTime: slot.time,
-          endTime: slot.endTime,
-          dayOfWeek: slot.dayOfWeek,
-          coaching,
-          price: pricePerSlot,
-          totalSlots: selectedSlots.length,
-          totalPrice: getTotalPrice(),
-        });
+      // 1. Send ONE WhatsApp notification with ALL slots
+      sendWhatsAppNotification({
+        name,
+        phone,
+        table,
+        duration,
+        date: selectedSlots[0].date,
+        startTime: selectedSlots[0].time,
+        endTime: selectedSlots[selectedSlots.length - 1].endTime,
+        dayOfWeek: selectedSlots[0].dayOfWeek,
+        coaching,
+        price: pricePerSlot,
+        totalSlots: selectedSlots.length,
+        totalPrice: getTotalPrice(),
+        allSlots: selectedSlots, // Pass all slots for detailed display
+      });
 
-        // 2. Admin notification email (ALWAYS SEND)
+      // 2. Send emails for each slot
+      const notificationPromises = selectedSlots.map(async (slot) => {
+        // Admin notification email (ALWAYS SEND)
         sendAdminNotificationEmail({
           customerName: name,
           customerEmail: email || 'Not provided',
@@ -328,7 +329,7 @@ const Book = () => {
           totalPrice: getTotalPrice(),
         });
 
-        // 3. Customer confirmation email (ONLY if email provided)
+        // Customer confirmation email (ONLY if email provided)
         if (email) {
           sendCustomerConfirmationEmail({
             customerName: name,
