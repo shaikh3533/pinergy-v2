@@ -312,26 +312,25 @@ const Book = () => {
           totalPrice: getTotalPrice(),
         });
 
-        // 2. Email notifications (if email provided)
-        if (email) {
-          // Customer confirmation email
-          sendCustomerConfirmationEmail({
-            customerName: name,
-            customerEmail: email,
-            customerPhone: phone,
-            table,
-            date: slot.date,
-            dayOfWeek: slot.dayOfWeek,
-            startTime: slot.time,
-            endTime: slot.endTime,
-            duration,
-            price: pricePerSlot,
-            totalSlots: selectedSlots.length,
-            totalPrice: getTotalPrice(),
-          });
+        // 2. Admin notification email (ALWAYS SEND)
+        sendAdminNotificationEmail({
+          customerName: name,
+          customerEmail: email || 'Not provided',
+          customerPhone: phone,
+          table,
+          date: slot.date,
+          dayOfWeek: slot.dayOfWeek,
+          startTime: slot.time,
+          endTime: slot.endTime,
+          duration,
+          price: pricePerSlot,
+          totalSlots: selectedSlots.length,
+          totalPrice: getTotalPrice(),
+        });
 
-          // Admin notification email
-          sendAdminNotificationEmail({
+        // 3. Customer confirmation email (ONLY if email provided)
+        if (email) {
+          sendCustomerConfirmationEmail({
             customerName: name,
             customerEmail: email,
             customerPhone: phone,
