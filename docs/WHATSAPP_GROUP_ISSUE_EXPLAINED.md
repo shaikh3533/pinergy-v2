@@ -32,7 +32,7 @@ According to [WhatsApp Business API documentation](https://developers.facebook.c
 
 ## ✅ **The Solution: Send to Admin Phone Instead**
 
-Your current setup already sends to admin phone: **03259898900** (923413393533)
+Your current setup already sends to admin phone: **0325-9898900** (923259898900)
 
 ### **How It Works Now:**
 
@@ -41,7 +41,7 @@ User Books Slot
     ↓
 Backend sends WhatsApp message
     ↓
-Message goes to Admin Phone: 923413393533
+Message goes to Admin Phone: 923259898900
     ↓
 Admin receives notification
     ↓
@@ -59,7 +59,7 @@ Send notifications to multiple admins instead of group:
 ```javascript
 // In backend-server-example.js
 const adminPhones = [
-  '923413393533', // Main admin
+  '923259898900', // Main admin
   '923001234567', // Admin 2
   '923009876543', // Admin 3
 ];
@@ -137,7 +137,7 @@ Telegram allows bots to post to groups:
 
 Your app is **already configured correctly**! 
 
-The message goes to: **923413393533** (your admin number)
+The message goes to: **923259898900** (your admin number)
 
 ### **What to Do:**
 
@@ -182,7 +182,7 @@ Available slots for promotion!
 ### **For Individual Bookings:**
 ```
 1. User books slot
-2. WhatsApp sent to admin phone (923413393533)
+2. WhatsApp sent to admin phone (923259898900)
 3. Admin sees notification on phone
 4. Important bookings? Forward to group manually
 ```
@@ -256,7 +256,7 @@ Use booking reports to auto-post to:
 
 ## 🎉 **Summary:**
 
-**Your app is working correctly!** WhatsApp messages **are being sent** to your admin phone (923413393533).
+**Your app is working correctly!** WhatsApp messages **are being sent** to your admin phone (923259898900).
 
 The "issue" is not a bug - it's a WhatsApp platform limitation. Groups cannot receive API messages directly.
 

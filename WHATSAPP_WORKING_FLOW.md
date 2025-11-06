@@ -110,7 +110,7 @@ _New booking received! Please check admin dashboard._
 `;
 
 // Creates WhatsApp URL
-const adminPhone = '923413393533'; // Your admin number
+const adminPhone = '923259898900'; // Your admin number
 const whatsappURL = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
 
 // Opens WhatsApp in new tab
@@ -287,9 +287,9 @@ After SQL fix, verify these:
 
 - [x] **Database:** RLS disabled → Bookings can save
 - [x] **Frontend:** WhatsApp function calls `window.open()`
-- [x] **Admin Phone:** Set to 923413393533 (international format)
+- [x] **Admin Phone:** Set to 923259898900 (international format)
 - [x] **Message:** Formatted with all booking details
-- [x] **URL:** `https://wa.me/923413393533?text=...`
+- [x] **URL:** `https://wa.me/923259898900?text=...`
 - [x] **Trigger:** Happens automatically after booking
 - [x] **User Experience:** Opens in new tab, doesn't interrupt booking
 
@@ -346,7 +346,7 @@ Admin can still check dashboard
 | **Database RLS** | ✅ Disabled | Bookings insert successfully |
 | **Pricing** | ✅ Dynamic | 500/1000, 400/800 from DB |
 | **User Lookup** | ✅ Smart | Checks email/phone first |
-| **WhatsApp URL** | ✅ Correct | wa.me/923413393533 |
+| **WhatsApp URL** | ✅ Correct | wa.me/923259898900 |
 | **Message Format** | ✅ Professional | Bold, emojis, complete info |
 | **Trigger** | ✅ Automatic | After successful booking |
 | **Browser Action** | ✅ Opens | New tab with WhatsApp |

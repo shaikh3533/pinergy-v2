@@ -117,7 +117,7 @@ const Ads = () => {
               Join our monthly SPINERGY Championship in Lahore! Compete with Pakistan's best players, win exciting
               prizes up to PKR 50,000, and boost your rating. Registration opens soon!
             </p>
-            <a href="https://wa.me/923413393533?text=I'm interested in the championship!" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-black font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+            <a href="https://wa.me/923259898900?text=I'm interested in the championship!" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-black font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105">
               Register via WhatsApp
             </a>
           </motion.div>

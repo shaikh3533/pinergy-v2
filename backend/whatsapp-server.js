@@ -70,7 +70,7 @@ app.post('/api/send-whatsapp', async (req, res) => {
       }
     } else {
       // For admin notifications, use admin number
-      const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER || '+923413393533';
+      const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER || '+923259898900';
       if (!adminNumber.startsWith('whatsapp:')) {
         recipientNumber = 'whatsapp:' + adminNumber;
       } else {

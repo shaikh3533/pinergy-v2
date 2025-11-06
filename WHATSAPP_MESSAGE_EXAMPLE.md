@@ -35,7 +35,7 @@ _New booking received! Please check admin dashboard._
 - Opens WhatsApp Web/App automatically
 - Message is pre-filled and ready to send
 - Works on desktop and mobile
-- Uses URL: `https://wa.me/923413393533?text=...`
+- Uses URL: `https://wa.me/923259898900?text=...`
 
 ### **Method 2: Backend API (Optional)**
 - If you set up Twilio backend later
@@ -48,7 +48,7 @@ _New booking received! Please check admin dashboard._
 
 **Phone Number:** 03259898900  
 **International Format:** +92 341 3393533  
-**WhatsApp Format:** 923413393533
+**WhatsApp Format:** 923259898900
 
 ---
 

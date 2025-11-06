@@ -65,7 +65,7 @@ UPDATE club_settings
 SET setting_value = '"03259898900"'
 WHERE setting_key = 'admin_phone';
 ```
-**Frontend:** WhatsApp opens to 923413393533 (international format)  
+**Frontend:** WhatsApp opens to 923259898900 (international format)  
 **Status:** ✅ Aligned
 
 ---

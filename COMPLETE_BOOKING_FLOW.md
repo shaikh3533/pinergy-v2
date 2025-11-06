@@ -395,7 +395,7 @@ supabase.functions.invoke('send-email', {
 ### **WhatsApp Integration:**
 ```javascript
 // Direct URL approach (no backend needed)
-const whatsappURL = `https://wa.me/923413393533?text=${encodeURIComponent(message)}`;
+const whatsappURL = `https://wa.me/923259898900?text=${encodeURIComponent(message)}`;
 window.open(whatsappURL, '_blank');
 ```
 

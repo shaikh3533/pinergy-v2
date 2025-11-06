@@ -17,7 +17,7 @@ app.use(cors());
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || 'YOUR_ACCESS_TOKEN_HERE';
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || 'YOUR_PHONE_NUMBER_ID_HERE';
-const ADMIN_PHONE = process.env.ADMIN_PHONE || '923413393533';
+const ADMIN_PHONE = process.env.ADMIN_PHONE || '923259898900';
 
 // WhatsApp API endpoint
 const WHATSAPP_API_URL = `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`;

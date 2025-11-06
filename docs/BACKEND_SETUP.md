@@ -41,7 +41,7 @@ Edit `.env` file and add your WhatsApp credentials:
 PORT=3000
 WHATSAPP_TOKEN=your_whatsapp_access_token_here
 PHONE_NUMBER_ID=your_phone_number_id_here
-ADMIN_PHONE=923413393533
+ADMIN_PHONE=923259898900
 ```
 
 **How to get these values:** See `WHATSAPP_INTEGRATION_GUIDE.md`
@@ -63,7 +63,7 @@ You should see:
 🏥 Health Check: http://localhost:3000/api/health
 🧪 Test WhatsApp: http://localhost:3000/api/test-whatsapp
 
-📱 Admin Phone: 923413393533
+📱 Admin Phone: 923259898900
 🔑 Token configured: Yes ✅
 🆔 Phone Number ID: Yes ✅
 ========================================
@@ -272,7 +272,7 @@ _Booking confirmed! See you at SPINERGY! 🏓_
 
 ### **Issue: WhatsApp message not received**
 **Solutions:**
-1. Check if `ADMIN_PHONE` is in correct format (923413393533)
+1. Check if `ADMIN_PHONE` is in correct format (923259898900)
 2. Verify your WhatsApp token is valid
 3. Check Meta Business API status
 4. Look at server logs for errors

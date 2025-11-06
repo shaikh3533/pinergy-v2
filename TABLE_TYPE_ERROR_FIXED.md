@@ -90,7 +90,7 @@ sendWhatsAppNotification({
 });
   ↓
 // Opens WhatsApp to admin
-window.open('https://wa.me/923413393533?text=...', '_blank');
+window.open('https://wa.me/923259898900?text=...', '_blank');
 ```
 
 ---

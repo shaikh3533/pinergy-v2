@@ -158,7 +158,7 @@ app.post('/api/send-whatsapp', async (req, res) => {
       WHATSAPP_API_URL,
       {
         messaging_product: 'whatsapp',
-        to: '923413393533', // Your admin number
+        to: '923259898900', // Your admin number
         type: 'text',
         text: {
           body: whatsappMessage,
@@ -234,7 +234,7 @@ Send individual messages to all group members.
 
 ```javascript
 // Send to multiple admin numbers
-const adminNumbers = ['923413393533', '923001234567'];
+const adminNumbers = ['923259898900', '923001234567'];
 for (const number of adminNumbers) {
   await sendWhatsAppMessage(number, message);
 }
@@ -287,7 +287,7 @@ app.post('/api/send-whatsapp', async (req, res) => {
     // Send WhatsApp message via Twilio
     const messageResponse = await client.messages.create({
       from: 'whatsapp:+14155238886', // Twilio WhatsApp number
-      to: 'whatsapp:+923413393533', // Your admin number
+      to: 'whatsapp:+923259898900', // Your admin number
       body: whatsappMessage,
     });
 

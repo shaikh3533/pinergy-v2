@@ -35,7 +35,7 @@
 
 **Why:** According to [WhatsApp's official documentation](https://developers.facebook.com/docs/whatsapp/), the API only supports sending to individual phone numbers, not groups.
 
-**Current Setup:** ✅ Messages ARE being sent to admin phone (923413393533)
+**Current Setup:** ✅ Messages ARE being sent to admin phone (923259898900)
 
 **Your group link:** https://chat.whatsapp.com/JCxLLXGZMSrBjoMSmpBq8m cannot receive API messages.
 
@@ -126,7 +126,7 @@ Copy the `report_summary` text and post to:
 
 #### **Current Status:**
 
-✅ **Working:** Messages sent to admin phone (923413393533)  
+✅ **Working:** Messages sent to admin phone (923259898900)  
 ❌ **Not Possible:** Direct messages to group
 
 #### **Why Groups Don't Work:**
@@ -147,7 +147,7 @@ User Books Slot
     ↓
 Booking saved to database ✅
     ↓
-WhatsApp message sent to: 923413393533 ✅
+WhatsApp message sent to: 923259898900 ✅
     ↓
 Admin receives notification on phone ✅
     ↓
@@ -160,7 +160,7 @@ Group: Not notified (WhatsApp limitation) ❌
 ```javascript
 // Send to multiple admins instead of group
 const adminPhones = [
-  '923413393533', // Main admin
+  '923259898900', // Main admin
   '923001234567', // Admin 2  
   '923009876543', // Admin 3
 ];

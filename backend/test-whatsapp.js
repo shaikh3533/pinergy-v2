@@ -7,7 +7,7 @@ const twilio = require('twilio');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioWhatsAppNumber = process.env.TWILIO_WHATSAPP_NUMBER;
-const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER || '+923413393533';
+const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER || '+923259898900';
 
 console.log('🧪 Testing Twilio WhatsApp Integration\n');
 

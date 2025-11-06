@@ -62,7 +62,7 @@ export const sendAdminWhatsAppNotification = async (
 
   try {
     // Admin phone number (SPINERGY company number)
-    const adminPhone = '923413393533';
+    const adminPhone = '923259898900';
     
     console.log('📤 Admin WhatsApp Notification Prepared:', message);
     console.log('📱 Opening WhatsApp for admin:', adminPhone);

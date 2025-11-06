@@ -154,7 +154,7 @@ Press F12 (Developer Tools)
 **Check 3: WhatsApp URL**
 ```
 In console, you'll see the URL:
-https://wa.me/923413393533?text=...
+https://wa.me/923259898900?text=...
 
 Copy it and paste in browser manually
 Should open WhatsApp with message

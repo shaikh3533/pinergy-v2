@@ -61,7 +61,7 @@ cp env.example .env
 # TWILIO_ACCOUNT_SID=ACxxxxxxxxxx
 # TWILIO_AUTH_TOKEN=your_token
 # TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
-# ADMIN_WHATSAPP_NUMBER=+923413393533
+# ADMIN_WHATSAPP_NUMBER=+923259898900
 
 # Start the server
 npm start
@@ -141,7 +141,7 @@ Should return:
 curl -X POST http://localhost:3001/api/send-whatsapp \
   -H "Content-Type: application/json" \
   -d '{
-    "to": "+923413393533",
+    "to": "+923259898900",
     "message": "🏓 Test message from SPINERGY! This is working! ✅",
     "type": "admin_notification"
   }'
@@ -153,7 +153,7 @@ curl -X POST http://localhost:3001/api/send-whatsapp \
 - Body (JSON):
 ```json
 {
-  "to": "+923413393533",
+  "to": "+923259898900",
   "message": "🏓 Test message from SPINERGY! This is working! ✅",
   "type": "admin_notification"
 }
@@ -234,7 +234,7 @@ Your table booking has been confirmed:
 
 ❌ **Problem:** WhatsApp API doesn't support sending to groups directly
 
-✅ **Fix:** Messages are sent to admin number (+923413393533). Admin can manually forward to group, or use WhatsApp Business API with group support.
+✅ **Fix:** Messages are sent to admin number (+923259898900). Admin can manually forward to group, or use WhatsApp Business API with group support.
 
 ---
 
