@@ -44,29 +44,39 @@ const Home = () => {
             Welcome to
           </h1>
           <div
-            className="text-6xl md:text-8xl lg:text-9xl font-black uppercase mb-4"
+            className="mb-4"
             style={{
-              transform: 'skew(-10deg)',
-              letterSpacing: '-2px',
-              textShadow: `
-                1px  1px  0  #5c6878,
-                2px  2px  0  #5c6878,
-                3px  3px  0  #5c6878,
-                4px  4px  0  #4a5461,
-                5px  5px  0  #38414b,
-                6px  6px  0  #263038,
-                7px 7px 0 #2e3943,
-                0 0 10px #4a86f7,
-                0 0 20px #4a86f7,
-                0 0 30px #4a86f7
-              `,
-              background: 'linear-gradient(to top, #7d8b9e 0%, #c0c9d7 50%, #7d8b9e 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 10px rgba(74, 134, 247, 0.4))',
             }}
           >
-            SPINERGY
+            <div
+              className="text-6xl md:text-8xl lg:text-9xl font-black uppercase"
+              style={{
+                transform: 'skewX(-10deg) translateY(-5px)',
+                letterSpacing: '-2px',
+                fontFamily: '"Arial Black", Arial, sans-serif',
+                background: `linear-gradient(
+                  to bottom, 
+                  #c4d0df 0%, 
+                  #a7b5c8 35%, 
+                  #768598 65%, 
+                  #3f4a56 100%
+                )`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: `
+                  2px 2px 0 #1e2630,
+                  4px 4px 0 #1e2630,
+                  6px 6px 0 #3f4a56,
+                  0 0 10px #4a86f7,
+                  0 0 25px #4a86f7,
+                  0 0 40px rgba(74, 134, 247, 0.5)
+                `,
+              }}
+            >
+              SPINERGY
+            </div>
           </div>
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Lahore's Premier Table Tennis Club with Professional Tibhar & DC-700 Tables
