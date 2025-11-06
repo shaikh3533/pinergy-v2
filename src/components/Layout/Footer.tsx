@@ -56,7 +56,7 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Our Tables</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li>🎯 DC-700 (Donic Waldner 25mm)</li>
+              <li>🎯 DC-700 (Double Circle Waldner 25mm)</li>
               <li>🎯 Tibhar (25mm Professional)</li>
             </ul>
           </div>
