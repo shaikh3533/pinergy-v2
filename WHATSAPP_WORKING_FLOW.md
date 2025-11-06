@@ -125,7 +125,7 @@ window.open(whatsappURL, '_blank'); // ✅ Opens WhatsApp!
 
 1. **A new browser tab/window opens**
 2. **WhatsApp Web or WhatsApp App loads**
-3. **Chat with 03413393533 (admin) opens**
+3. **Chat with 03259898900 (admin) opens**
 4. **Message is already typed and ready to send**
 
 **The pre-filled message:**
@@ -169,7 +169,7 @@ _New booking received! Please check admin dashboard._
 14:38 - ✅ Booking saved to database
 14:38 - ✅ Toast shows: "🎉 Booking confirmed!"
 14:38 - ✅ WhatsApp opens automatically
-14:38 - 📱 Chat with 03413393533 opens
+14:38 - 📱 Chat with 03259898900 opens
 14:38 - 📝 Message is pre-filled:
         
         🏓 *SPINERGY - New Booking Alert*
@@ -207,7 +207,7 @@ User books → Database allows (RLS disabled) → Booking saved → WhatsApp ope
 
 ## 📱 What Admin Will See
 
-**On WhatsApp (03413393533):**
+**On WhatsApp (03259898900):**
 
 ```
 New message from Website User (automated)
@@ -255,7 +255,7 @@ Admin just clicks "Send" and message is delivered!
 **Expected:**
 - ✅ Success message appears
 - ✅ WhatsApp opens in new tab
-- ✅ Chat with 03413393533 opens
+- ✅ Chat with 03259898900 opens
 - ✅ Message is pre-filled
 - ✅ Just click "Send"!
 
@@ -327,7 +327,7 @@ Admin can still check dashboard
 
 ### **For Testing:**
 - Use your own phone number to test
-- You'll see WhatsApp open to admin (03413393533)
+- You'll see WhatsApp open to admin (03259898900)
 - Message will be pre-filled
 - Click Send to complete test
 
@@ -350,7 +350,7 @@ Admin can still check dashboard
 | **Message Format** | ✅ Professional | Bold, emojis, complete info |
 | **Trigger** | ✅ Automatic | After successful booking |
 | **Browser Action** | ✅ Opens | New tab with WhatsApp |
-| **Admin Phone** | ✅ Set | 03413393533 in DB |
+| **Admin Phone** | ✅ Set | 03259898900 in DB |
 
 **Everything is connected and working!** ✅
 
@@ -365,7 +365,7 @@ Admin can still check dashboard
 **What you need to do:**
 1. ✅ SQL fix applied (RLS disabled, pricing updated)
 2. ✅ Frontend code already has WhatsApp integration
-3. ✅ Admin phone set (03413393533)
+3. ✅ Admin phone set (03259898900)
 4. ✅ Message format ready
 
 **What happens automatically:**

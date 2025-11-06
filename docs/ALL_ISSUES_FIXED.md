@@ -430,7 +430,7 @@ vercel
 ## 📞 **Quick Reference:**
 
 **Supabase URL:** https://mioxecluvalizougrstz.supabase.co  
-**Admin Phone:** 03413393533  
+**Admin Phone:** 03259898900  
 **Location:** Suny Park, Lahore  
 **Map Link:** https://maps.app.goo.gl/kPC6pqQPnyRWGfai8  
 **WhatsApp Group:** https://chat.whatsapp.com/JCxLLXGZMSrBjoMSmpBq8m  

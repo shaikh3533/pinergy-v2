@@ -58,11 +58,11 @@ UPDATE pricing_rules SET price = 800
 ---
 
 ### **4. Admin Phone for WhatsApp** ✅
-**Suggestion:** Set admin phone to 03413393533  
+**Suggestion:** Set admin phone to 03259898900  
 **SQL Action:**
 ```sql
 UPDATE club_settings 
-SET setting_value = '"03413393533"'
+SET setting_value = '"03259898900"'
 WHERE setting_key = 'admin_phone';
 ```
 **Frontend:** WhatsApp opens to 923413393533 (international format)  
@@ -80,7 +80,7 @@ WHERE setting_key = 'admin_phone';
 - [x] **Remove unique constraint on phone** → Allows multiple bookings
 - [x] **Update Table A pricing** → 500/1000 PKR
 - [x] **Update Table B pricing** → 400/800 PKR
-- [x] **Set admin phone** → 03413393533
+- [x] **Set admin phone** → 03259898900
 - [x] **Verify all changes** → Built-in verification
 
 ---
@@ -108,7 +108,7 @@ After:  New pricing (500/1000, 400/800)
 ### **Step 4: Set Admin Phone** (Lines 91-95)
 ```
 Before: admin_phone might be wrong/empty
-After:  admin_phone = "03413393533"
+After:  admin_phone = "03259898900"
 ```
 
 ### **Step 5: Auto-Verify** (Lines 100-238)
@@ -215,7 +215,7 @@ Expected: ✅ Shows 400 PKR
 #### **Test 4: WhatsApp Notification**
 ```
 Action: Complete booking
-Expected: ✅ WhatsApp opens with message to 03413393533
+Expected: ✅ WhatsApp opens with message to 03259898900
 ```
 
 ---
@@ -264,7 +264,7 @@ UPDATE pricing_rules SET price = 800 WHERE ...;
 -- ... (8 total)
 
 -- 4. Set admin phone
-UPDATE club_settings SET setting_value = '"03413393533"' WHERE ...;
+UPDATE club_settings SET setting_value = '"03259898900"' WHERE ...;
 
 -- 5. Verify everything (automatic)
 ```
@@ -303,7 +303,7 @@ SELECT setting_value
 FROM club_settings 
 WHERE setting_key = 'admin_phone';
 ```
-**Expected:** `"03413393533"`
+**Expected:** `"03259898900"`
 
 ---
 

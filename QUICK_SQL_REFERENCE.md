@@ -68,7 +68,7 @@ Should work immediately! ✅
 │  • RLS disabled → Bookings work             │
 │  • Email NOT UNIQUE → No duplicates         │
 │  • Correct pricing (500/1000, 400/800)      │
-│  • Admin phone: 03413393533                 │
+│  • Admin phone: 03259898900                 │
 └─────────────────────────────────────────────┘
 ```
 
@@ -105,7 +105,7 @@ UPDATE pricing_rules SET price = 800  -- 60 min
 ### **Change 4: Set Admin Phone**
 ```sql
 UPDATE club_settings 
-SET setting_value = '"03413393533"'
+SET setting_value = '"03259898900"'
 WHERE setting_key = 'admin_phone';
 ```
 **Fixes:** WhatsApp notification target
@@ -147,7 +147,7 @@ The SQL script automatically checks:
 | No duplicate errors | Remove UNIQUE | ✅ |
 | Table A: 500/1000 | UPDATE pricing | ✅ |
 | Table B: 400/800 | UPDATE pricing | ✅ |
-| Admin: 03413393533 | UPDATE settings | ✅ |
+| Admin: 03259898900 | UPDATE settings | ✅ |
 | WhatsApp to admin | Set phone | ✅ |
 
 **100% Aligned!** ✅
@@ -177,7 +177,7 @@ Table B, 30 min → Shows 400 PKR ✅
 ### **Test 4: WhatsApp**
 ```
 After booking → Opens WhatsApp ✅
-To: 03413393533 ✅
+To: 03259898900 ✅
 Message: Pre-filled ✅
 ```
 

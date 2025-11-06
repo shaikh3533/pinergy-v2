@@ -137,7 +137,7 @@ INSERT INTO club_settings (setting_key, setting_value, description) VALUES
   ('weekday_hours', '{"start": "14:00", "end": "02:00"}', 'Monday-Friday operating hours'),
   ('weekend_hours', '{"start": "12:00", "end": "03:00"}', 'Saturday-Sunday operating hours'),
   ('booking_window_days', '"7"', 'Maximum days in advance for booking'),
-  ('admin_phone', '"03413393533"', 'Admin contact number'),
+  ('admin_phone', '"03259898900"', 'Admin contact number'),
   ('whatsapp_group_id', '"JCxLLXGZMSrBjoMSmpBq8m"', 'WhatsApp group for notifications')
 ON CONFLICT (setting_key) DO NOTHING;
 

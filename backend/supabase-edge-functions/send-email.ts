@@ -158,7 +158,7 @@ function generateCustomerEmail(data: any): string {
           <tr>
             <td style="padding: 0 20px 30px 20px; text-align: center;">
               <p style="color: #666; font-size: 14px;">📍 Suny Park, Lahore, Punjab</p>
-              <p style="color: #666; font-size: 14px;">📱 03413393533</p>
+              <p style="color: #666; font-size: 14px;">📱 03259898900</p>
             </td>
           </tr>
 

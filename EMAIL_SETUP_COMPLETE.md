@@ -86,14 +86,14 @@ Total: PKR 1000
 - Cancellation policy
 
 📍 Suny Park, Lahore
-📱 03413393533
+📱 03259898900
 ```
 
 ---
 
 ## 3️⃣ OPEN WHATSAPP ✅
 
-**To:** `03413393533` (admin number)  
+**To:** `03259898900` (admin number)  
 **What:** Opens automatically with pre-filled message  
 **Message:** Professional notification with all booking details
 
@@ -278,7 +278,7 @@ supabase.functions.invoke('send-email', {
 
 ### **Check WhatsApp:**
 1. After booking, WhatsApp should open
-2. Message to 03413393533
+2. Message to 03259898900
 3. All details pre-filled
 4. Professional format
 
@@ -314,8 +314,8 @@ supabase.functions.invoke('send-email', {
 ## 📞 ADMIN CONTACT
 
 **Email:** spinergy.info@gmail.com  
-**Phone:** 03413393533  
-**WhatsApp:** 03413393533
+**Phone:** 03259898900  
+**WhatsApp:** 03259898900
 
 All notifications go to these channels!
 

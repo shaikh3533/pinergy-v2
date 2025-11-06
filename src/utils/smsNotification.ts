@@ -76,7 +76,7 @@ export const generateBookingSMS = (data: {
     `Time: ${data.startTime}-${data.endTime}\n` +
     `Total: PKR ${data.totalPrice}\n\n` +
     `Location: Suny Park, Lahore\n` +
-    `Ph: 03413393533\n` +
+    `Ph: 03259898900\n` +
     `See you! 🏓`;
 };
 

@@ -25,7 +25,7 @@ I've fixed **3 issues** in one go:
 - ✅ Disables RLS (fixes booking errors)
 - ✅ Fixes table type constraint ⭐ NEW
 - ✅ Updates pricing (500/1000, 400/800)
-- ✅ Sets admin phone (03413393533)
+- ✅ Sets admin phone (03259898900)
 
 ---
 
@@ -64,7 +64,7 @@ Click "Confirm Booking"
     ↓
 ✅ WhatsApp opens in new tab
     ↓
-✅ Chat with 03413393533 (admin)
+✅ Chat with 03259898900 (admin)
     ↓
 ✅ Message is pre-filled:
 
@@ -117,7 +117,7 @@ After:  Opens automatically with message ✅
 | Error display | ✅ | Toast shows errors |
 | Success message | ✅ | Toast shows success |
 | WhatsApp | ✅ | Opens automatically |
-| Admin phone | ✅ | 03413393533 |
+| Admin phone | ✅ | 03259898900 |
 | Message format | ✅ | Professional with details |
 
 ---
@@ -145,7 +145,7 @@ After SQL + Refresh, you should be able to:
 - [x] Book Table B without errors ✅
 - [x] See success toast after booking ✅
 - [x] See WhatsApp open automatically ✅
-- [x] Message sent to 03413393533 ✅
+- [x] Message sent to 03259898900 ✅
 - [x] If error: See error toast ✅
 
 ---

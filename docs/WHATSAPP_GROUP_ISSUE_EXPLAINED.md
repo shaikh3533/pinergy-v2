@@ -32,7 +32,7 @@ According to [WhatsApp Business API documentation](https://developers.facebook.c
 
 ## ✅ **The Solution: Send to Admin Phone Instead**
 
-Your current setup already sends to admin phone: **03413393533** (923413393533)
+Your current setup already sends to admin phone: **03259898900** (923413393533)
 
 ### **How It Works Now:**
 

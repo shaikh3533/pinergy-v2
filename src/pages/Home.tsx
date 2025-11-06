@@ -40,10 +40,34 @@ const Home = () => {
               className="h-32 w-auto mx-auto"
             />
           </motion.div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 tracking-wider">
-            Welcome to <span className="text-primary-blue">SPIN</span>
-            <span className="text-primary-red">ERGY</span>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4">
+            Welcome to
           </h1>
+          <div
+            className="text-6xl md:text-8xl lg:text-9xl font-black uppercase mb-4"
+            style={{
+              transform: 'skew(-10deg)',
+              letterSpacing: '-2px',
+              textShadow: `
+                1px  1px  0  #5c6878,
+                2px  2px  0  #5c6878,
+                3px  3px  0  #5c6878,
+                4px  4px  0  #4a5461,
+                5px  5px  0  #38414b,
+                6px  6px  0  #263038,
+                7px 7px 0 #2e3943,
+                0 0 10px #4a86f7,
+                0 0 20px #4a86f7,
+                0 0 30px #4a86f7
+              `,
+              background: 'linear-gradient(to top, #7d8b9e 0%, #c0c9d7 50%, #7d8b9e 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            SPINERGY
+          </div>
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Lahore's Premier Table Tennis Club with Professional Tibhar & DC-700 Tables
           </p>

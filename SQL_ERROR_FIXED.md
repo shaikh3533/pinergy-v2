@@ -77,7 +77,7 @@ UPDATE pricing_rules SET price = 800  -- Table B, 60 min
 -- ... (8 rules total)
 
 -- 3. Set Admin Phone (WhatsApp)
-UPDATE club_settings SET setting_value = '"03413393533"'
+UPDATE club_settings SET setting_value = '"03259898900"'
 WHERE setting_key = 'admin_phone';
 
 -- 4. Verify (shows results)
@@ -145,7 +145,7 @@ Expected: Shows 1000 PKR ✅
 ### **Test 4: WhatsApp**
 ```
 After booking
-Expected: Opens WhatsApp to 03413393533 ✅
+Expected: Opens WhatsApp to 03259898900 ✅
 ```
 
 ---

@@ -31,7 +31,7 @@ After running the SQL fix, WhatsApp booking confirmation is **100% READY**.
 ✅ Success toast appears: "🎉 Booking confirmed!"
 ✅ A new tab/window opens automatically
 ✅ WhatsApp Web/App loads
-✅ Chat with 03413393533 opens
+✅ Chat with 03259898900 opens
 ✅ Message is already typed!
 ```
 
@@ -68,7 +68,7 @@ New browser tab opens
     ↓
 WhatsApp Web loads
     ↓
-Chat with 03413393533 ready
+Chat with 03259898900 ready
     ↓
 Message pre-filled
     ↓
@@ -81,7 +81,7 @@ Tap Confirm
     ↓
 WhatsApp app opens
     ↓
-Chat with 03413393533 ready
+Chat with 03259898900 ready
     ↓
 Message pre-filled
     ↓
@@ -97,7 +97,7 @@ Tap "Send" to complete
 1. ✅ **Booking saves** without errors
 2. ✅ **Success toast** shows "🎉 Booking confirmed!"
 3. ✅ **WhatsApp opens** automatically (new tab/app)
-4. ✅ **Admin number** shows: 03413393533
+4. ✅ **Admin number** shows: 03259898900
 5. ✅ **Message is pre-filled** with all booking details
 6. ✅ **Ready to send** with one click
 
@@ -195,7 +195,7 @@ Booking → Saved successfully → WhatsApp opens → Message ready
                  ↓
 ┌─────────────────────────────────────────────┐
 │  WHATSAPP: Opens automatically ✅           │
-│  To: 03413393533 (Admin)                    │
+│  To: 03259898900 (Admin)                    │
 │  Message: Pre-filled with booking details   │
 └─────────────────────────────────────────────┘
                  ↓
@@ -214,7 +214,7 @@ Booking → Saved successfully → WhatsApp opens → Message ready
 | Database (RLS) | ✅ Fixed |
 | Booking insert | ✅ Works |
 | WhatsApp function | ✅ Implemented |
-| Admin phone | ✅ Set (03413393533) |
+| Admin phone | ✅ Set (03259898900) |
 | Message format | ✅ Professional |
 | Auto-open | ✅ Configured |
 
@@ -235,7 +235,7 @@ Booking → Saved successfully → WhatsApp opens → Message ready
 
 When you test:
 - ✅ Booking completes successfully
-- ✅ WhatsApp opens to 03413393533
+- ✅ WhatsApp opens to 03259898900
 - ✅ Message shows your test booking details
 - ✅ Just click "Send" to confirm it works
 

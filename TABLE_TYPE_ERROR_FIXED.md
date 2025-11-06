@@ -135,7 +135,7 @@ Close and reopen the browser tab
 **Expected result:**
 ```
 ✅ Success toast: "🎉 Booking confirmed!"
-✅ WhatsApp opens to 03413393533
+✅ WhatsApp opens to 03259898900
 ✅ Message pre-filled with booking details
 ✅ No errors!
 ```
@@ -203,7 +203,7 @@ Success toast shows ✅
     ↓
 WhatsApp opens with message ✅
   Message shows: "Table A" (readable format)
-  To: 03413393533
+  To: 03259898900
     ↓
 Admin receives notification ✅
 ```
@@ -228,7 +228,7 @@ After booking, WhatsApp will open with:
 _New booking received! Please check admin dashboard._
 ```
 
-**Sent to:** 03413393533 (admin)  
+**Sent to:** 03259898900 (admin)  
 **Action:** Click "Send"  
 **Result:** Admin notified instantly ✅
 
@@ -242,7 +242,7 @@ After running the SQL and refreshing:
 - [ ] Can book Table B (no error) ✅
 - [ ] See success toast after booking ✅
 - [ ] WhatsApp opens automatically ✅
-- [ ] Message sent to 03413393533 ✅
+- [ ] Message sent to 03259898900 ✅
 - [ ] If error occurs, toast shows it ✅
 
 ---

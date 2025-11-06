@@ -100,7 +100,7 @@ WHERE table_type = 'table_b' AND duration_minutes = 60 AND coaching = true;
 -- ================================================================
 
 UPDATE club_settings 
-SET setting_value = '"03413393533"'
+SET setting_value = '"03259898900"'
 WHERE setting_key = 'admin_phone';
 
 -- ================================================================

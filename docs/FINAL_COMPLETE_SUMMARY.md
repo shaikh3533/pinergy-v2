@@ -486,7 +486,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 **Admin Dashboard:** `/admin`  
 **Settings:** `/admin` → ⚙️ Settings  
 **Booking:** `/book`  
-**Admin Phone:** 03413393533  
+**Admin Phone:** 03259898900  
 **Location:** Suny Park, Lahore  
 
 ---

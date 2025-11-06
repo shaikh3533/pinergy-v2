@@ -5,7 +5,7 @@
 When a booking is made:
 1. ✅ **Booking saved to database**
 2. ✅ **WhatsApp opens automatically** with pre-filled message
-3. ✅ **Admin (03413393533) receives notification**
+3. ✅ **Admin (03259898900) receives notification**
 
 ---
 
@@ -46,7 +46,7 @@ _New booking received! Please check admin dashboard._
 
 ## 📱 Admin WhatsApp Details
 
-**Phone Number:** 03413393533  
+**Phone Number:** 03259898900  
 **International Format:** +92 341 3393533  
 **WhatsApp Format:** 923413393533
 
@@ -86,7 +86,7 @@ _New booking received! Please check admin dashboard._
 
 1. ✅ WhatsApp opens automatically after booking
 2. ✅ Message is pre-filled with all details
-3. ✅ Sent to admin: 03413393533
+3. ✅ Sent to admin: 03259898900
 4. ✅ Works on desktop and mobile
 5. ✅ Professional message format
 6. ✅ All booking info included
@@ -128,7 +128,7 @@ _New booking received! Please check admin dashboard._
 
 All messages include:
 - 📍 **Location:** Suny Park, Lahore
-- 📞 **Contact:** 03413393533
+- 📞 **Contact:** 03259898900
 - 🏓 **Brand:** SPINERGY
 
 ---

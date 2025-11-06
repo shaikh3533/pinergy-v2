@@ -232,7 +232,7 @@ export const generateCustomerEmailHTML = (data: BookingEmailData): string => {
           <tr>
             <td style="padding: 0 20px 30px 20px; text-align: center;">
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">📍 <strong>Location:</strong> Suny Park, Lahore, Punjab</p>
-              <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">📱 <strong>Phone:</strong> 03413393533</p>
+              <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">📱 <strong>Phone:</strong> 03259898900</p>
               <p style="margin: 0; color: #666; font-size: 14px;">📧 <strong>Email:</strong> spinergy.info@gmail.com</p>
             </td>
           </tr>
@@ -444,7 +444,7 @@ export const generateAdminEmailHTML = (data: BookingEmailData): string => {
           <!-- System Info -->
           <tr>
             <td style="padding: 0 20px 30px 20px; text-align: center;">
-              <p style="margin: 0; color: #9ca3af; font-size: 12px;">📍 Suny Park, Lahore | 📱 03413393533</p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">📍 Suny Park, Lahore | 📱 03259898900</p>
               <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 12px;">🌐 Spinergy Booking System</p>
             </td>
           </tr>
@@ -478,6 +478,6 @@ export const generateCustomerSMS = (data: BookingEmailData): string => {
     `Total: PKR ${data.totalPrice}\n\n` +
     `See you at SPINERGY! 🏓\n` +
     `Location: Suny Park, Lahore\n` +
-    `Ph: 03413393533`;
+    `Ph: 03259898900`;
 };
 

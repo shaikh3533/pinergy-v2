@@ -50,7 +50,7 @@ Your table booking has been confirmed:
 💰 Total Amount: PKR 1000
 
 📍 Location: Suny Park, Lahore
-📞 Contact: 03413393533
+📞 Contact: 03259898900
 
 ⚠️ Important: Please arrive 5 minutes before your slot time.
 
@@ -76,7 +76,7 @@ Time: 18:00-19:00
 Total: PKR 1000
 
 Location: Suny Park, Lahore
-Ph: 03413393533
+Ph: 03259898900
 See you! 🏓
 ```
 

@@ -278,7 +278,7 @@ Build the project and upload the `dist/` folder to any static hosting service.
 - **Timings:**
   - Monday-Friday: 2:00 PM - 2:00 AM
   - Saturday-Sunday: 12:00 PM - 3:00 AM
-- **Contact:** 03413393533
+- **Contact:** 03259898900
 
 ---
 

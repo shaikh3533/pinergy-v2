@@ -83,7 +83,7 @@ Expected Payment: PKR 1000
 [📞 Call Customer] [💬 WhatsApp]
 
 ---
-📍 Suny Park, Lahore | 📱 03413393533
+📍 Suny Park, Lahore | 📱 03259898900
 🌐 Spinergy Booking System
 ```
 
@@ -124,7 +124,7 @@ Total Amount: PKR 1000
 - Late arrivals may result in reduced playing time
 
 📍 Location: Suny Park, Lahore, Punjab
-📱 Phone: 03413393533
+📱 Phone: 03259898900
 📧 Email: spinergy.info@gmail.com
 
 ---
@@ -144,7 +144,7 @@ Thank you for choosing SPINERGY!
 
 ### **3A: Admin WhatsApp**
 
-**To:** `03413393533` (admin number)  
+**To:** `03259898900` (admin number)  
 **Action:** Opens automatically in new tab with pre-filled message
 
 **Message:**
@@ -285,7 +285,7 @@ Clicks "Confirm Booking"
 │ ACTION 3: OPEN WHATSAPP                     │
 ├─────────────────────────────────────────────┤
 │ ✅ New tab opens                            │
-│ ✅ WhatsApp to 03413393533                  │
+│ ✅ WhatsApp to 03259898900                  │
 │ ✅ Message pre-filled with all details      │
 │ ✅ Admin just clicks "Send"                 │
 └─────────────────────────────────────────────┘
@@ -329,7 +329,7 @@ After booking, verify all 4 actions:
 
 ### **Action 3: WhatsApp ✅**
 - [ ] WhatsApp opens in new tab automatically
-- [ ] Chat with 03413393533 opens
+- [ ] Chat with 03259898900 opens
 - [ ] Message is pre-filled
 - [ ] All booking details are there
 - [ ] Professional format with sections

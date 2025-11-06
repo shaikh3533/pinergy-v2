@@ -1,6 +1,6 @@
 # 📱 WhatsApp Business API Integration Guide
 
-This guide will help you set up automatic WhatsApp notifications from your **SPINERGY admin number (03413393533)** to your WhatsApp group when bookings are made.
+This guide will help you set up automatic WhatsApp notifications from your **SPINERGY admin number (03259898900)** to your WhatsApp group when bookings are made.
 
 ---
 
@@ -8,14 +8,14 @@ This guide will help you set up automatic WhatsApp notifications from your **SPI
 
 Send WhatsApp messages **automatically from your server** (not from user's device) when:
 - A new booking is created
-- Message sent FROM admin number (03413393533)
+- Message sent FROM admin number (03259898900)
 - Message sent TO WhatsApp group (JCxLLXGZMSrBjoMSmpBq8m)
 
 ---
 
 ## 📋 What You Need
 
-1. ✅ WhatsApp Business Account (for admin number 03413393533)
+1. ✅ WhatsApp Business Account (for admin number 03259898900)
 2. ✅ WhatsApp Business API access (we'll set this up)
 3. ✅ A backend server (Node.js/Python/PHP) to handle API calls
 4. ✅ Meta/Facebook Business Account (for official API)
@@ -97,7 +97,7 @@ Services like WATI, Interakt, Aisensy, CallMeBot
 
 1. You'll get a **Test Phone Number** from Meta
 2. Copy the **Temporary Access Token**
-3. Add your admin number (03413393533) as a recipient
+3. Add your admin number (03259898900) as a recipient
 
 ### **Step 5: Verify Your Business Phone Number**
 
@@ -227,7 +227,7 @@ node server.js
 ### **Workarounds:**
 
 #### **Option A: Send to Admin Number (Recommended)**
-Send the message to your admin number (03413393533), and you manually forward it to the group.
+Send the message to your admin number (03259898900), and you manually forward it to the group.
 
 #### **Option B: Send to Multiple Recipients**
 Send individual messages to all group members.
@@ -358,7 +358,7 @@ VITE_BACKEND_URL=https://your-backend-url.vercel.app/api/send-whatsapp
 1. Make a test booking in your app
 2. Check the browser console for logs
 3. Check your backend server logs
-4. Check your admin WhatsApp (03413393533)
+4. Check your admin WhatsApp (03259898900)
 5. You should receive the booking notification!
 
 ---
@@ -376,7 +376,7 @@ Backend receives request
     ↓
 Backend calls WhatsApp Business API
     ↓
-WhatsApp sends message to admin number (03413393533)
+WhatsApp sends message to admin number (03259898900)
     ↓
 Admin receives notification on WhatsApp ✅
     ↓
