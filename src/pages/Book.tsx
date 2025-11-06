@@ -95,12 +95,14 @@ const Book = () => {
       
       setFetchingSlots(true);
       try {
+        // Fetch ALL bookings for this date/table (regardless of duration)
+        // This is important because 30-min bookings can block 60-min slots and vice versa
         const { data, error } = await supabase
           .from('bookings')
           .select('*')
           .eq('date', selectedDate)
-          .eq('table_id', tableId)
-          .eq('slot_duration', duration);
+          .eq('table_id', tableId);
+          // Removed .eq('slot_duration', duration) to get all bookings
 
         if (error) throw error;
         setBookedSlots(data || []);
@@ -113,7 +115,7 @@ const Book = () => {
     };
 
     fetchBookedSlots();
-  }, [selectedDate, tableId, duration]);
+  }, [selectedDate, tableId]); // Removed 'duration' from dependencies
 
   // Update available time slots when date or duration changes
   useEffect(() => {
@@ -131,11 +133,30 @@ const Book = () => {
     }
   }, []);
 
-  // Check if a slot is already booked
+  // Check if a slot is already booked or overlaps with existing bookings
   const isSlotBooked = (slotValue: string) => {
-    return bookedSlots.some(
-      booking => booking.start_time === slotValue
-    );
+    // Calculate the end time for the slot we're checking
+    const slotEndTime = getEndTime(slotValue, duration);
+    
+    // Check if this slot overlaps with any existing booking
+    return bookedSlots.some(booking => {
+      // A slot overlaps if:
+      // 1. Booking starts before slot ends AND
+      // 2. Booking ends after slot starts
+      const bookingStart = booking.start_time;
+      const bookingEnd = booking.end_time;
+      
+      // Convert times to comparable format (e.g., "14:00" -> 1400)
+      const slotStartNum = parseInt(slotValue.replace(':', ''));
+      const slotEndNum = parseInt(slotEndTime.replace(':', ''));
+      const bookingStartNum = parseInt(bookingStart.replace(':', ''));
+      const bookingEndNum = parseInt(bookingEnd.replace(':', ''));
+      
+      // Check for overlap
+      const overlaps = (bookingStartNum < slotEndNum) && (bookingEndNum > slotStartNum);
+      
+      return overlaps;
+    });
   };
 
   const handleSlotToggle = (slot: TimeSlot) => {
