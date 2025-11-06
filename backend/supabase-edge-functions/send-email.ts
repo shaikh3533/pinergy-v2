@@ -41,7 +41,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'SPINERGY <bookings@spinergy.pk>',
+        from: 'SPINERGY <>',
         to: [to],
         subject: subject,
         html: emailContent,

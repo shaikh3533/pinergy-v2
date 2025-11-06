@@ -230,7 +230,7 @@ VALUES
   (
     'Professional Coaching Available',
     'Learn from the best! Our certified coaches are now available for one-on-one sessions.',
-    'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=800',
+    'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800',
     NULL
   )
 ON CONFLICT DO NOTHING;

@@ -1,6 +1,6 @@
 # 📚 SPINERGY Documentation
 
-Welcome to the SPINERGY Table Tennis Club Management System documentation!
+Welcome to the 15-Commercial SPINERGY Club Management System documentation!
 
 ## 🚀 **Quick Start:**
 

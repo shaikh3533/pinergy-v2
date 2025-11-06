@@ -243,7 +243,7 @@ Book now! 🏓
 Slots available NOW!
 Book: [link]
 
-#TableTennis #Karachi #SPINERGY
+#TableTennis #Lahore #SPINERGY
 ```
 
 ---

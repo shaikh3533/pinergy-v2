@@ -10,7 +10,7 @@ const Contact = () => {
         >
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-white mb-4">Contact Us</h1>
-            <p className="text-gray-400">Get in touch with SPINERGY Table Tennis Club</p>
+            <p className="text-gray-400">Get in touch with 15-Commercial SPINERGY Club</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
@@ -47,7 +47,7 @@ const Contact = () => {
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">Location</h3>
                     <p className="text-gray-400">
-                      SPINERGY Table Tennis Club<br />
+                      15-Commercial SPINERGY Club<br />
                       Suny Park, Lahore<br />
                       Punjab, Pakistan
                     </p>
@@ -132,8 +132,8 @@ const Contact = () => {
                         spinergy.info@gmail.com
                       </a>
                       <br />
-                      <a href="mailto:bookings@spinergy.pk" className="hover:text-white transition">
-                        bookings@spinergy.pk
+                      <a href="mailto:" className="hover:text-white transition">
+                        
                       </a>
                     </p>
                   </div>
@@ -165,8 +165,8 @@ const Contact = () => {
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">Opening Hours</h3>
                     <div className="text-gray-400 space-y-1">
-                      <p>Monday - Friday: 2:00 PM - 2:00 AM</p>
-                      <p>Saturday - Sunday: 12:00 PM - 3:00 AM</p>
+                      <p>Monday - Friday: 4:00 PM - 2:00  AM</p>
+                      <p>Saturday - Sunday: 4:00 PM - 2:00  AM</p>
                       <p className="text-primary-blue mt-2">Open 7 days a week!</p>
                     </div>
                   </div>
@@ -256,7 +256,7 @@ const Contact = () => {
                 allowFullScreen
                 loading="lazy" 
                 referrerPolicy="no-referrer-when-downgrade"
-                title="SPINERGY Table Tennis Club Location"
+                title="15-Commercial SPINERGY Club Location"
               />
             </div>
             <div className="mt-4 text-center">

@@ -254,7 +254,7 @@ VALUES
   (
     'Professional Coaching Available',
     'Learn from certified coaches! One-on-one sessions now available. Book your coaching slot today.',
-    'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=800',
+    'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800',
     NULL
   )
 ON CONFLICT DO NOTHING;

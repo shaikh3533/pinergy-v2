@@ -1,6 +1,6 @@
 # 📊 Database SQL Scripts
 
-This folder contains all Supabase SQL scripts for the SPINERGY Table Tennis Club Management System.
+This folder contains all Supabase SQL scripts for the 15-Commercial SPINERGY Club Management System.
 
 ## ⚙️ **Setup Order (Run in This Order):**
 

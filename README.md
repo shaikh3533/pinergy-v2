@@ -270,14 +270,14 @@ Build the project and upload the `dist/` folder to any static hosting service.
 
 ## 🏢 **Club Information**
 
-- **Name:** SPINERGY Table Tennis Club
+- **Name:** 15-Commercial SPINERGY Club
 - **Location:** Suny Park, Lahore, Punjab, Pakistan
 - **Tables:** 
   - Table A: Tibhar Top (25mm ITTF approved)
   - Table B: DC-700 (25mm professional)
 - **Timings:**
-  - Monday-Friday: 2:00 PM - 2:00 AM
-  - Saturday-Sunday: 12:00 PM - 3:00 AM
+  - Monday-Friday: 4:00 PM - 2:00  AM
+  - Saturday-Sunday: 4:00 PM - 2:00  AM
 - **Contact:** 03259898900
 
 ---

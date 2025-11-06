@@ -65,7 +65,7 @@ Your SmashZone app has been completely rebranded to **SPINERGY** with your custo
 - Footer
 
 ✅ **Contact Information**
-- Email: `spinergy.info@gmail.com`, `bookings@spinergy.pk`
+- Email: `spinergy.info@gmail.com`, ``
 - Location: SPINERGY Club, Lahore, Pakistan
 - Club name in all references
 
