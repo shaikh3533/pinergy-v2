@@ -3,7 +3,12 @@ import logoImage from '../../assets/primary white variant logo.jpeg';
 
 const Footer = () => {
   return (
-    <footer className="bg-black border-t border-gray-800 mt-auto">
+    <footer 
+      className="bg-black border-t border-gray-800 mt-auto relative"
+      style={{
+        boxShadow: '0 -2px 20px rgba(74, 134, 247, 0.1), 0 -1px 10px rgba(74, 134, 247, 0.15)'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>

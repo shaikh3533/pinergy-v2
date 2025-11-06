@@ -17,6 +17,9 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className="bg-black border-b border-gray-800 sticky top-0 z-50"
+      style={{
+        boxShadow: '0 2px 20px rgba(74, 134, 247, 0.1), 0 1px 10px rgba(74, 134, 247, 0.15)'
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
