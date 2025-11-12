@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { FaTableTennis, FaTrophy, FaMedal, FaAward } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import type { User } from '../lib/supabase';
 import { getLevelBadgeColor } from '../utils/ratingSystem';
@@ -58,7 +59,9 @@ const Ratings = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="card text-center py-16"
             >
-              <div className="text-6xl mb-6">🏓</div>
+              <div className="text-6xl mb-6 text-primary-blue">
+                <FaTableTennis className="inline-block" />
+              </div>
               <h2 className="text-2xl font-bold text-white mb-3">
                 Leaderboard Coming Soon
               </h2>
@@ -90,7 +93,9 @@ const Ratings = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="card text-center py-12 mb-8"
             >
-              <div className="text-5xl mb-4">🎯</div>
+              <div className="text-5xl mb-4 text-primary-blue">
+                <FaAward className="inline-block" />
+              </div>
               <h2 className="text-xl font-bold text-white mb-3">
                 Rankings Building Up
               </h2>
@@ -111,7 +116,9 @@ const Ratings = () => {
                 transition={{ delay: 0.2 }}
                 className="card text-center md:mt-8"
               >
-                <div className="text-4xl mb-4">🥈</div>
+                <div className="text-4xl mb-4 text-gray-400">
+                  <FaMedal className="inline-block" />
+                </div>
                 <div className="w-24 h-24 mx-auto rounded-full bg-gray-700 flex items-center justify-center mb-4 overflow-hidden">
                   {players[1].profile_pic ? (
                     <img
@@ -141,7 +148,9 @@ const Ratings = () => {
                 transition={{ delay: 0.1 }}
                 className="card text-center border-2 border-yellow-500"
               >
-                <div className="text-6xl mb-4">🏆</div>
+                <div className="text-6xl mb-4 text-yellow-400">
+                  <FaTrophy className="inline-block" />
+                </div>
                 <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center mb-4 overflow-hidden border-4 border-yellow-400">
                   {players[0].profile_pic ? (
                     <img
@@ -171,7 +180,9 @@ const Ratings = () => {
                 transition={{ delay: 0.3 }}
                 className="card text-center md:mt-8"
               >
-                <div className="text-4xl mb-4">🥉</div>
+                <div className="text-4xl mb-4 text-orange-400">
+                  <FaMedal className="inline-block" />
+                </div>
                 <div className="w-24 h-24 mx-auto rounded-full bg-gray-700 flex items-center justify-center mb-4 overflow-hidden">
                   {players[2].profile_pic ? (
                     <img
@@ -232,7 +243,13 @@ const Ratings = () => {
                           }`}>
                             #{index + 1}
                           </span>
-                          {index < 3 && <span className="ml-2">{index === 0 ? '🏆' : index === 1 ? '🥈' : '🥉'}</span>}
+                          {index < 3 && (
+                            <span className="ml-2">
+                              {index === 0 && <FaTrophy className="inline text-yellow-400" />}
+                              {index === 1 && <FaMedal className="inline text-gray-400" />}
+                              {index === 2 && <FaMedal className="inline text-orange-400" />}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="py-4 px-4">

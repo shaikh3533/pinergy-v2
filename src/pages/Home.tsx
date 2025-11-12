@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { 
+  FaTableTennis, 
+  FaChalkboardTeacher, 
+  FaTrophy, 
+  FaCheckCircle 
+} from 'react-icons/fa';
 import logoImage from '../assets/primary white variant logo.jpeg';
 import tibharImage from '../assets/tibhar.png';
 import dc700Image from '../assets/dc-700.png';
@@ -119,7 +125,9 @@ const Home = () => {
               transition={{ delay: 0.1 }}
               className="card text-center"
             >
-              <div className="text-5xl mb-4">🎯</div>
+              <div className="text-5xl mb-4 text-primary-blue">
+                <FaTableTennis className="inline-block" />
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">Professional Tables</h3>
               <p className="text-gray-400">
                 Premium 25mm professional tables from Tibhar and DC-700
@@ -133,7 +141,9 @@ const Home = () => {
               transition={{ delay: 0.2 }}
               className="card text-center"
             >
-              <div className="text-5xl mb-4">👨‍🏫</div>
+              <div className="text-5xl mb-4 text-primary-red">
+                <FaChalkboardTeacher className="inline-block" />
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">Expert Coaching</h3>
               <p className="text-gray-400">
                 Learn from experienced coaches to improve your game
@@ -147,7 +157,9 @@ const Home = () => {
               transition={{ delay: 0.3 }}
               className="card text-center"
             >
-              <div className="text-5xl mb-4">🏆</div>
+              <div className="text-5xl mb-4 text-yellow-400">
+                <FaTrophy className="inline-block" />
+              </div>
               <h3 className="text-xl font-semibold text-white mb-2">Competitive Play</h3>
               <p className="text-gray-400">
                 Join our rating system and compete with players at all levels
@@ -191,11 +203,26 @@ const Home = () => {
                 ITTF-Approved Premium 25mm Tibhar professional table
               </p>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>✓ 25mm ITTF-Approved Thickness</li>
-                <li>✓ Anti-Glare Laminate Surface</li>
-                <li>✓ Robust Steel Frame with Leveling System</li>
-                <li>✓ Professional Net & Post Included</li>
-                <li>✓ Tournament-Ready Performance</li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-blue flex-shrink-0" />
+                  25mm ITTF-Approved Thickness
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-blue flex-shrink-0" />
+                  Anti-Glare Laminate Surface
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-blue flex-shrink-0" />
+                  Robust Steel Frame with Leveling System
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-blue flex-shrink-0" />
+                  Professional Net & Post Included
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-blue flex-shrink-0" />
+                  Tournament-Ready Performance
+                </li>
               </ul>
             </motion.div>
 
@@ -217,11 +244,26 @@ const Home = () => {
                 Double Circle DC-700 Professional 25mm ITTF-approved table
               </p>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>✓ Table Size: 2740mm × 1525mm × 760mm</li>
-                <li>✓ 25mm Blue Top - Tournament Grade</li>
-                <li>✓ Foldable Design with 100mm Wheels</li>
-                <li>✓ 50×50mm Robust Steel Frame</li>
-                <li>✓ Superior Bounce & Durability</li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-red flex-shrink-0" />
+                  Table Size: 2740mm × 1525mm × 760mm
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-red flex-shrink-0" />
+                  25mm Blue Top - Tournament Grade
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-red flex-shrink-0" />
+                  Foldable Design with 100mm Wheels
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-red flex-shrink-0" />
+                  50×50mm Robust Steel Frame
+                </li>
+                <li className="flex items-center gap-2">
+                  <FaCheckCircle className="text-primary-red flex-shrink-0" />
+                  Superior Bounce & Durability
+                </li>
               </ul>
             </motion.div>
           </div>

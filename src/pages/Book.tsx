@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { 
+  FaCheckCircle, 
+  FaEnvelope, 
+  FaWhatsapp, 
+  FaSms, 
+  FaBell, 
+  FaClock, 
+  FaTableTennis,
+  FaCheck
+} from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { calculateBookingPrice, calculateBookingPriceSync, fetchPricingRules } from '../utils/pricingCalculator';
@@ -315,10 +325,10 @@ const Book = () => {
         : `${selectedSlots.length} slots`;
       
       toast.success(
-        `✅ Booking Confirmed!\n${table} • ${selectedSlots[0].date}\n${slotText}`,
+        `Booking Confirmed!\n${table} • ${selectedSlots[0].date}\n${slotText}`,
         {
           duration: 5000,
-          icon: '🎉',
+          icon: <FaCheckCircle />,
           style: {
             minWidth: '300px',
           },
@@ -442,25 +452,27 @@ const Book = () => {
           className="card max-w-2xl w-full"
         >
           <div className="text-center mb-6">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="text-6xl mb-4 text-green-400">
+              <FaCheckCircle className="inline-block" />
+            </div>
             <h2 className="text-3xl font-bold text-white mb-2">
               {selectedSlots.length} Slot{selectedSlots.length > 1 ? 's' : ''} Booked Successfully!
             </h2>
             <div className="space-y-2 mt-4">
-              <p className="text-green-400 font-semibold">
-                ✅ Booking confirmed!
+              <p className="text-green-400 font-semibold flex items-center justify-center gap-2">
+                <FaCheckCircle /> Booking confirmed!
               </p>
-              <p className="text-gray-400 text-sm">
-                📧 Confirmation email sent {email && `to ${email}`}
+              <p className="text-gray-400 text-sm flex items-center justify-center gap-2">
+                <FaEnvelope /> Confirmation email sent {email && `to ${email}`}
               </p>
-              <p className="text-gray-400 text-sm">
-                📱 WhatsApp confirmation sent {phone && `to ${phone}`}
+              <p className="text-gray-400 text-sm flex items-center justify-center gap-2">
+                <FaWhatsapp /> WhatsApp confirmation sent {phone && `to ${phone}`}
               </p>
-              <p className="text-gray-400 text-sm">
-                💬 SMS confirmation sent {phone && `to ${phone}`}
+              <p className="text-gray-400 text-sm flex items-center justify-center gap-2">
+                <FaSms /> SMS confirmation sent {phone && `to ${phone}`}
               </p>
-              <p className="text-blue-400 text-sm mt-3">
-                🔔 Admin has been notified about your booking
+              <p className="text-blue-400 text-sm mt-3 flex items-center justify-center gap-2">
+                <FaBell /> Admin has been notified about your booking
               </p>
             </div>
           </div>
@@ -506,7 +518,9 @@ const Book = () => {
           </div>
 
           <p className="text-sm text-gray-500 text-center mt-6">
-            See you at SPINERGY! 🏓
+            <div className="flex items-center justify-center gap-2">
+              See you at SPINERGY! <FaTableTennis className="text-primary-blue" />
+            </div>
           </p>
         </motion.div>
       </div>
@@ -544,7 +558,9 @@ const Book = () => {
 
           {/* Club Timings Info */}
           <div className="card mb-6 bg-gradient-to-r from-primary-blue/10 to-primary-red/10 border-primary-blue">
-            <h3 className="text-lg font-bold text-white mb-3">🕐 Club Timings</h3>
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <FaClock className="text-primary-blue" /> Club Timings
+            </h3>
             <div className="text-center">
               <div className="bg-gray-800/50 rounded-lg p-4 inline-block">
                 <div className="text-primary-blue font-semibold mb-2">All Days</div>
@@ -802,10 +818,12 @@ const Book = () => {
                                     : 'border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
                                 }`}
                               >
-                                <div className="font-semibold text-sm">{slot.label}</div>
-                                {selected && (
-                                  <div className="text-xs text-primary-blue mt-1">✓ Selected</div>
-                                )}
+                              <div className="font-semibold text-sm">{slot.label}</div>
+                              {selected && (
+                                <div className="text-xs text-primary-blue mt-1 flex items-center justify-center gap-1">
+                                  <FaCheck /> Selected
+                                </div>
+                              )}
                               </motion.button>
                             );
                           })}
@@ -892,13 +910,17 @@ const Book = () => {
                   
                   <div className="text-center space-y-1">
                     <p className="text-xs text-gray-400">
-                      ✅ You'll receive confirmation via:
+                      <FaCheckCircle className="inline" /> You'll receive confirmation via:
                     </p>
-                    <p className="text-xs text-gray-500">
-                      📧 Email {email && '• '}📱 WhatsApp {phone && '• '}💬 SMS
+                    <p className="text-xs text-gray-500 flex items-center justify-center gap-2 flex-wrap">
+                      <span className="flex items-center gap-1"><FaEnvelope /> Email</span>
+                      {email && '• '}
+                      <span className="flex items-center gap-1"><FaWhatsapp /> WhatsApp</span>
+                      {phone && '• '}
+                      <span className="flex items-center gap-1"><FaSms /> SMS</span>
                     </p>
-                    <p className="text-xs text-blue-400 mt-2">
-                      🔔 Admin will be notified automatically
+                    <p className="text-xs text-blue-400 mt-2 flex items-center justify-center gap-1">
+                      <FaBell /> Admin will be notified automatically
                     </p>
                   </div>
 
