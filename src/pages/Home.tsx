@@ -191,11 +191,36 @@ const Home = () => {
               viewport={{ once: true }}
               className="card"
             >
-              <div className="bg-gradient-to-br from-primary-blue to-blue-900 h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-2">
+              <div 
+                className="relative h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-4"
+                style={{
+                  background: 'radial-gradient(ellipse at top, rgba(74, 134, 247, 0.3), transparent), radial-gradient(ellipse at bottom, rgba(59, 130, 246, 0.25), transparent), linear-gradient(135deg, #1e3a8a 0%, #0f172a 50%, #1e293b 100%)',
+                  boxShadow: '0 8px 32px rgba(74, 134, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(74, 134, 247, 0.2)',
+                }}
+              >
+                {/* Subtle grid pattern */}
+                <div 
+                  className="absolute inset-0 opacity-5"
+                  style={{
+                    backgroundImage: 'linear-gradient(rgba(74, 134, 247, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(74, 134, 247, 0.5) 1px, transparent 1px)',
+                    backgroundSize: '50px 50px'
+                  }}
+                />
+                {/* Spotlight effect */}
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    background: 'radial-gradient(circle at 50% 0%, rgba(74, 134, 247, 0.15) 0%, transparent 60%)'
+                  }}
+                />
                 <img 
                   src={tibharImage} 
                   alt="Tibhar Table" 
-                  className="w-full h-full object-contain"
+                  className="relative w-full h-full object-contain drop-shadow-2xl"
+                  style={{
+                    filter: 'drop-shadow(0 0 20px rgba(74, 134, 247, 0.3))'
+                  }}
                 />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Table A - Tibhar</h3>
@@ -232,11 +257,36 @@ const Home = () => {
               viewport={{ once: true }}
               className="card"
             >
-              <div className="bg-gradient-to-br from-primary-red to-red-900 h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-2">
+              <div 
+                className="relative h-64 rounded-lg mb-4 flex items-center justify-center overflow-hidden p-4"
+                style={{
+                  background: 'radial-gradient(ellipse at top, rgba(239, 68, 68, 0.3), transparent), radial-gradient(ellipse at bottom, rgba(220, 38, 38, 0.25), transparent), linear-gradient(135deg, #7f1d1d 0%, #0f172a 50%, #1e293b 100%)',
+                  boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                }}
+              >
+                {/* Subtle grid pattern */}
+                <div 
+                  className="absolute inset-0 opacity-5"
+                  style={{
+                    backgroundImage: 'linear-gradient(rgba(239, 68, 68, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(239, 68, 68, 0.5) 1px, transparent 1px)',
+                    backgroundSize: '50px 50px'
+                  }}
+                />
+                {/* Spotlight effect */}
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    background: 'radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.15) 0%, transparent 60%)'
+                  }}
+                />
                 <img 
                   src={dc700Image} 
                   alt="DC-700 Table" 
-                  className="w-full h-full object-contain"
+                  className="relative w-full h-full object-contain drop-shadow-2xl"
+                  style={{
+                    filter: 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.3))'
+                  }}
                 />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Table B - DC-700</h3>
