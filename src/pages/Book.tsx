@@ -309,11 +309,21 @@ const Book = () => {
         hours: totalHours,
       });
 
-      // Show immediate success toast
-      toast.success('🎉 Booking confirmed!', {
-        duration: 4000,
-        icon: '✅',
-      });
+      // Show immediate success toast with booking details
+      const slotText = selectedSlots.length === 1 
+        ? `${selectedSlots[0].time} - ${selectedSlots[0].endTime}`
+        : `${selectedSlots.length} slots`;
+      
+      toast.success(
+        `✅ Booking Confirmed!\n${table} • ${selectedSlots[0].date}\n${slotText}`,
+        {
+          duration: 5000,
+          icon: '🎉',
+          style: {
+            minWidth: '300px',
+          },
+        }
+      );
 
       // 1. Send ONE WhatsApp notification with ALL slots
       sendWhatsAppNotification({
@@ -393,8 +403,9 @@ const Book = () => {
       ]);
 
       // Show notification status toast
-      toast.success('📲 Confirmation messages sent!', {
+      toast.success('📲 WhatsApp & Email notifications sent!', {
         duration: 3000,
+        icon: '✉️',
       });
 
       setSuccess(true);
@@ -534,14 +545,10 @@ const Book = () => {
           {/* Club Timings Info */}
           <div className="card mb-6 bg-gradient-to-r from-primary-blue/10 to-primary-red/10 border-primary-blue">
             <h3 className="text-lg font-bold text-white mb-3">🕐 Club Timings</h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div className="bg-gray-800/50 rounded-lg p-3">
-                <div className="text-primary-blue font-semibold mb-1">Monday - Friday</div>
-                <div className="text-gray-300">2:00 PM to 2:00 AM</div>
-              </div>
-              <div className="bg-gray-800/50 rounded-lg p-3">
-                <div className="text-primary-red font-semibold mb-1">Saturday - Sunday</div>
-                <div className="text-gray-300">12:00 PM to 3:00 AM</div>
+            <div className="text-center">
+              <div className="bg-gray-800/50 rounded-lg p-4 inline-block">
+                <div className="text-primary-blue font-semibold mb-2">All Days</div>
+                <div className="text-gray-300 text-lg">4:00 PM to 12:00 AM</div>
               </div>
             </div>
           </div>
@@ -768,7 +775,7 @@ const Book = () => {
                           Available Time Slots - {next7Days.find(d => d.date === selectedDate)?.dayOfWeek}
                         </h3>
                         <div className="text-sm text-gray-400">
-                          {isWeekend(new Date(selectedDate)) ? '12 PM - 3 AM' : '2 PM - 2 AM'}
+                          4 PM - 12 AM
                         </div>
                       </div>
                       

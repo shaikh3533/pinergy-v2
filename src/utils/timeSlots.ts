@@ -45,11 +45,10 @@ export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[
   const isWeekendDay = isWeekend(date);
   
   // Club timings:
-  // Monday-Friday: 14:00 (2 PM) to 02:00 (2 AM next day)
-  // Saturday-Sunday: 12:00 (12 PM) to 03:00 (3 AM next day)
+  // All days: 16:00 (4 PM) to 00:00 (12 AM midnight)
   
-  const startHour = isWeekendDay ? 12 : 14; // 12 PM or 2 PM
-  const endHour = isWeekendDay ? 27 : 26; // 3 AM or 2 AM (next day, so 24+3=27 or 24+2=26)
+  const startHour = 16; // 4 PM for all days
+  const endHour = 24; // 12 AM midnight for all days
   
   let currentMinutes = startHour * 60; // Convert to minutes
   const endMinutes = endHour * 60;
@@ -89,8 +88,8 @@ export const isValidTimeSlot = (date: Date, time: string, duration: 30 | 60): bo
   const [hours, minutes] = time.split(':').map(Number);
   const timeInMinutes = hours * 60 + minutes;
   
-  const startLimit = isWeekendDay ? 12 * 60 : 14 * 60; // 12 PM or 2 PM
-  const endLimit = isWeekendDay ? 3 * 60 : 2 * 60; // 3 AM or 2 AM
+  const startLimit = 16 * 60; // 4 PM for all days
+  const endLimit = 24 * 60; // 12 AM midnight for all days
   
   // Check if start time is within limits
   if (timeInMinutes < startLimit) return false;

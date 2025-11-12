@@ -51,6 +51,56 @@ const Ratings = () => {
             </p>
           </div>
 
+          {/* No Players Message */}
+          {players.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="card text-center py-16"
+            >
+              <div className="text-6xl mb-6">🏓</div>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Leaderboard Coming Soon
+              </h2>
+              <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                The rating system will activate once competitive play begins. 
+                Be among the first to claim your spot on the leaderboard!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="/book"
+                  className="btn-primary inline-block"
+                >
+                  Book a Session
+                </a>
+                <a
+                  href="/rules"
+                  className="btn-secondary inline-block"
+                >
+                  Learn About Ratings
+                </a>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Few Players Message (1-2 players) */}
+          {players.length > 0 && players.length < 3 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="card text-center py-12 mb-8"
+            >
+              <div className="text-5xl mb-4">🎯</div>
+              <h2 className="text-xl font-bold text-white mb-3">
+                Rankings Building Up
+              </h2>
+              <p className="text-gray-400 max-w-md mx-auto">
+                We need more competitive players to display the full leaderboard. 
+                Join us and start your journey to the top!
+              </p>
+            </motion.div>
+          )}
+
           {/* Top 3 Players */}
           {players.length >= 3 && (
             <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -147,21 +197,22 @@ const Ratings = () => {
           )}
 
           {/* All Players Table */}
-          <div className="card">
-            <h2 className="text-2xl font-bold text-white mb-6">All Players</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Rank</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Player</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Level</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Points</th>
-                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Hours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {players.map((player, index) => (
+          {players.length > 0 && (
+            <div className="card">
+              <h2 className="text-2xl font-bold text-white mb-6">All Players</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Rank</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Player</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Level</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Points</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Hours</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players.map((player, index) => (
                     <motion.tr
                       key={player.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -216,11 +267,12 @@ const Ratings = () => {
                         <span className="text-gray-300">{player.total_hours_played.toFixed(1)}h</span>
                       </td>
                     </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
       </div>
     </div>

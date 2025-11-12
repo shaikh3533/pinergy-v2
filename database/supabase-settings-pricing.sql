@@ -134,8 +134,8 @@ ON CONFLICT (table_type, duration_minutes, coaching) DO UPDATE SET
 -- Step 8: Insert default club settings
 INSERT INTO club_settings (setting_key, setting_value, description) VALUES
   ('coaching_base_price', '"200"', 'Base price for coaching (added to table price)'),
-  ('weekday_hours', '{"start": "14:00", "end": "02:00"}', 'Monday-Friday operating hours'),
-  ('weekend_hours', '{"start": "12:00", "end": "03:00"}', 'Saturday-Sunday operating hours'),
+  ('weekday_hours', '{"start": "16:00", "end": "00:00"}', 'Monday-Friday operating hours (4 PM - 12 AM)'),
+  ('weekend_hours', '{"start": "16:00", "end": "00:00"}', 'Saturday-Sunday operating hours (4 PM - 12 AM)'),
   ('booking_window_days', '"7"', 'Maximum days in advance for booking'),
   ('admin_phone', '"03259898900"', 'Admin contact number'),
   ('whatsapp_group_id', '"JCxLLXGZMSrBjoMSmpBq8m"', 'WhatsApp group for notifications')
