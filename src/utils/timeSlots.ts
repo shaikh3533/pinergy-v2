@@ -40,7 +40,7 @@ export const getEndTime = (startTime: string, duration: 30 | 60): string => {
   return addMinutesToTime(startTime, duration);
 };
 
-export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[] => {
+export const generateTimeSlots = (_date: Date, duration: 30 | 60 = 30): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   
   // Club timings:
@@ -82,7 +82,7 @@ export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[
   return slots;
 };
 
-export const isValidTimeSlot = (date: Date, time: string, duration: 30 | 60): boolean => {
+export const isValidTimeSlot = (_date: Date, time: string, duration: 30 | 60): boolean => {
   const [hours, minutes] = time.split(':').map(Number);
   const timeInMinutes = hours * 60 + minutes;
   
