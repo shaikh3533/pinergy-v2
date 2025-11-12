@@ -42,7 +42,6 @@ export const getEndTime = (startTime: string, duration: 30 | 60): string => {
 
 export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const isWeekendDay = isWeekend(date);
   
   // Club timings:
   // All days: 16:00 (4 PM) to 00:00 (12 AM midnight)
@@ -84,7 +83,6 @@ export const generateTimeSlots = (date: Date, duration: 30 | 60 = 30): TimeSlot[
 };
 
 export const isValidTimeSlot = (date: Date, time: string, duration: 30 | 60): boolean => {
-  const isWeekendDay = isWeekend(date);
   const [hours, minutes] = time.split(':').map(Number);
   const timeInMinutes = hours * 60 + minutes;
   

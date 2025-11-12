@@ -23,7 +23,6 @@ import {
   generateTimeSlots,
   getDayOfWeek,
   getEndTime,
-  isWeekend,
 } from '../utils/timeSlots';
 import type { TimeSlot } from '../utils/timeSlots';
 import type { Booking } from '../lib/supabase';
