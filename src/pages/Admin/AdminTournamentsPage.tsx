@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League, LeaguePlayer, User, LeagueStatus } from '../../lib/supabase';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay, isEqual } from 'date-fns';
 import AdminLayout from '../../components/Admin/AdminLayout';
 
 import type { LeagueType } from '../../lib/supabase';
@@ -219,22 +219,18 @@ const AdminTournamentsPage = () => {
       return;
     }
 
+    // Use only the core fields that exist in the database
+    // Note: Run database/UPDATE_TOURNAMENT_TYPES.sql to enable advanced tournament features
     const leagueData = {
       name: formData.name,
       league_type: formData.league_type,
       date: formData.date,
       rules: formData.rules,
       max_players: formData.max_players,
-      group_stage_sets: formData.group_stage_sets,
-      round_robin_sets: formData.group_stage_sets, // Legacy field
-      quarterfinal_sets: formData.quarterfinal_sets,
+      round_robin_sets: formData.group_stage_sets,
       semifinal_sets: formData.semifinal_sets,
       final_sets: formData.final_sets,
       top_qualifiers: formData.top_qualifiers,
-      num_groups: formData.league_type === 'group_stage_knockouts' ? formData.num_groups : null,
-      qualifiers_per_group: formData.league_type === 'group_stage_knockouts' ? formData.qualifiers_per_group : null,
-      has_third_place_match: formData.has_third_place_match,
-      has_quarterfinals: formData.has_quarterfinals,
       schedule_days: [],
       frequency: 'single',
       status: 'upcoming' as const,
@@ -410,16 +406,46 @@ const AdminTournamentsPage = () => {
     }
   };
 
-  const getStatusColor = (status: LeagueStatus) => {
+  // Check if a league date is in the future
+  const isLeagueDateUpcoming = (league: League): boolean => {
+    const leagueDate = league.date || league.start_date;
+    if (!leagueDate) return true;
+    const today = startOfDay(new Date());
+    const date = startOfDay(new Date(leagueDate));
+    return isAfter(date, today) || isEqual(date, today);
+  };
+
+  const getStatusColor = (status: LeagueStatus, league?: League) => {
+    // If status is upcoming but date has passed, show as past
+    if (status === 'upcoming' && league && !isLeagueDateUpcoming(league)) {
+      return 'bg-gray-500';
+    }
     switch (status) {
-      case 'upcoming': return 'bg-gray-600';
-      case 'registration': return 'bg-blue-600';
+      case 'upcoming': return 'bg-blue-600';
+      case 'registration': return 'bg-green-600';
       case 'group_stage': return 'bg-purple-600';
       case 'round_robin': return 'bg-yellow-600';
       case 'knockouts': return 'bg-orange-600';
-      case 'completed': return 'bg-green-600';
+      case 'completed': return 'bg-gray-600';
       case 'cancelled': return 'bg-red-600';
       default: return 'bg-gray-600';
+    }
+  };
+
+  const getStatusLabel = (status: LeagueStatus, league?: League): string => {
+    // If status is upcoming but date has passed, show as past
+    if (status === 'upcoming' && league && !isLeagueDateUpcoming(league)) {
+      return 'Date Passed';
+    }
+    switch (status) {
+      case 'upcoming': return 'Upcoming';
+      case 'registration': return 'Registration Open';
+      case 'group_stage': return 'Group Stage';
+      case 'round_robin': return 'Round Robin';
+      case 'knockouts': return 'Knockouts';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return status;
     }
   };
 
@@ -490,8 +516,8 @@ const AdminTournamentsPage = () => {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-bold text-white">{league.name}</h3>
-                    <span className={`px-2 py-1 rounded text-xs text-white ${getStatusColor(league.status)}`}>
-                      {league.status}
+                    <span className={`px-2 py-1 rounded text-xs text-white ${getStatusColor(league.status, league)}`}>
+                      {getStatusLabel(league.status, league)}
                     </span>
                   </div>
                   <div className="text-sm text-gray-400 space-y-1">
@@ -767,8 +793,8 @@ const AdminTournamentsPage = () => {
                     ? format(new Date(selectedLeague.date), 'EEEE, MMMM d, yyyy')
                     : 'Date TBD'}
                 </p>
-                <span className={`inline-block mt-2 px-3 py-1 rounded text-sm text-white ${getStatusColor(selectedLeague.status)}`}>
-                  {selectedLeague.status}
+                <span className={`inline-block mt-2 px-3 py-1 rounded text-sm text-white ${getStatusColor(selectedLeague.status, selectedLeague)}`}>
+                  {getStatusLabel(selectedLeague.status, selectedLeague)}
                 </span>
               </div>
               <button

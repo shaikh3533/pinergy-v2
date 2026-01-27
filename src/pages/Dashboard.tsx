@@ -1,18 +1,42 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { FaEdit, FaTimes, FaSave, FaTrophy } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
-import type { Booking, Match } from '../lib/supabase';
+import type { Booking, Match, LeagueMatch, LeaguePlayer } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { formatDate } from '../utils/dateUtils';
 import { getLevelBadgeColor } from '../utils/ratingSystem';
+
+interface TournamentRegistration {
+  id: string;
+  league_id: string;
+  league: {
+    id: string;
+    name: string;
+    status: string;
+    date?: string;
+  };
+}
 
 const Dashboard = () => {
   const { user, updateProfile } = useAuthStore();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [leagueMatches, setLeagueMatches] = useState<LeagueMatch[]>([]);
+  const [registeredTournaments, setRegisteredTournaments] = useState<TournamentRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  
+  // Profile editing state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -35,7 +59,7 @@ const Dashboard = () => {
       if (bookingsError) throw bookingsError;
       setBookings(bookingsData || []);
 
-      // Fetch matches
+      // Fetch casual matches
       const { data: matchesData, error: matchesError } = await supabase
         .from('matches')
         .select('*, player1:player1_id(name), player2:player2_id(name), winner:winner_id(name)')
@@ -45,10 +69,83 @@ const Dashboard = () => {
 
       if (matchesError) throw matchesError;
       setMatches(matchesData || []);
+
+      // Fetch tournament registrations
+      const { data: tournamentsData } = await supabase
+        .from('league_players')
+        .select('id, league_id, league:league_id(id, name, status, date)')
+        .eq('player_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (tournamentsData) {
+        setRegisteredTournaments(tournamentsData as unknown as TournamentRegistration[]);
+      }
+
+      // Fetch tournament matches
+      const { data: leagueMatchesData } = await supabase
+        .from('league_matches')
+        .select('*, player1:player1_id(id, name), player2:player2_id(id, name), winner:winner_id(id, name), league:league_id(id, name)')
+        .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (leagueMatchesData) {
+        setLeagueMatches(leagueMatchesData as unknown as LeagueMatch[]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEditModal = () => {
+    if (user) {
+      setEditForm({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+      setShowEditModal(true);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    if (!editForm.name.trim()) {
+      toast.error('Name is required');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          name: editForm.name.trim(),
+          email: editForm.email.trim() || null,
+          phone: editForm.phone.trim() || null,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      await updateProfile({
+        name: editForm.name.trim(),
+        email: editForm.email.trim() || undefined,
+        phone: editForm.phone.trim() || undefined,
+      });
+
+      toast.success('Profile updated successfully!');
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -194,8 +291,18 @@ const Dashboard = () => {
               </div>
 
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl font-bold text-white mb-2">{user.name}</h1>
-                <p className="text-gray-400 mb-4">{user.email}</p>
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-white">{user.name}</h1>
+                  <button
+                    onClick={openEditModal}
+                    className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition"
+                    title="Edit profile"
+                  >
+                    <FaEdit />
+                  </button>
+                </div>
+                <p className="text-gray-400 mb-1">{user.email}</p>
+                {user.phone && <p className="text-gray-500 text-sm mb-4">{user.phone}</p>}
                 
                 <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                   <div className="bg-gray-800 rounded-lg px-4 py-2">
@@ -218,6 +325,88 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Registered Tournaments */}
+          {registeredTournaments.length > 0 && (
+            <div className="card mb-8">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <FaTrophy className="text-yellow-500" /> My Tournaments
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {registeredTournaments.map((reg) => (
+                  <Link
+                    key={reg.id}
+                    to={`/leagues/${reg.league_id}`}
+                    className="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition border border-gray-700 hover:border-primary-blue"
+                  >
+                    <h3 className="font-semibold text-white mb-2">{reg.league?.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        reg.league?.status === 'completed' ? 'bg-green-600' :
+                        reg.league?.status === 'round_robin' || reg.league?.status === 'knockouts' ? 'bg-yellow-600' :
+                        reg.league?.status === 'registration' ? 'bg-blue-600' :
+                        'bg-gray-600'
+                      } text-white`}>
+                        {reg.league?.status}
+                      </span>
+                      {reg.league?.date && (
+                        <span className="text-xs text-gray-400">{formatDate(reg.league.date)}</span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tournament Matches */}
+          {leagueMatches.length > 0 && (
+            <div className="card mb-8">
+              <h2 className="text-2xl font-bold text-white mb-6">Tournament Matches</h2>
+              <div className="space-y-4">
+                {leagueMatches.map((match) => {
+                  const isWinner = match.winner_id === user?.id;
+                  const opponent = match.player1_id === user?.id 
+                    ? (match.player2 as any)?.name 
+                    : (match.player1 as any)?.name;
+                  return (
+                    <div
+                      key={match.id}
+                      className="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-sm text-gray-400">
+                          {(match.league as any)?.name} - {match.match_type}
+                        </div>
+                        {match.status === 'completed' && (
+                          <div
+                            className={`text-xs font-bold px-2 py-1 rounded ${
+                              isWinner ? 'bg-green-600' : 'bg-red-600'
+                            }`}
+                          >
+                            {isWinner ? 'WON' : 'LOST'}
+                          </div>
+                        )}
+                        {match.status !== 'completed' && (
+                          <div className="text-xs bg-yellow-600 px-2 py-1 rounded font-bold">
+                            {match.status.toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-white">
+                        vs {opponent || 'TBD'}
+                      </div>
+                      {match.status === 'completed' && (
+                        <div className="text-sm text-primary-blue mt-1">
+                          Sets: {match.player1_sets_won} - {match.player2_sets_won}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Recent Bookings */}
@@ -313,6 +502,83 @@ const Dashboard = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-gray-900 rounded-2xl w-full max-w-md"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <h3 className="text-xl font-bold text-white">Edit Profile</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 text-gray-400 hover:text-white transition"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="label">Name *</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="input-field"
+                  placeholder="Your full name"
+                />
+              </div>
+
+              <div>
+                <label className="label">Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="input-field"
+                  placeholder="email@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="label">Phone</label>
+                <input
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="input-field"
+                  placeholder="03XX-XXXXXXX"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-800">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="px-4 py-2 bg-primary-blue hover:bg-blue-600 disabled:bg-gray-600 text-white rounded-lg flex items-center gap-2 transition"
+              >
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                ) : (
+                  <FaSave />
+                )}
+                Save Changes
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

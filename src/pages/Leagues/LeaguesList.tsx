@@ -7,11 +7,12 @@ import {
   FaUsers, 
   FaTableTennis,
   FaSearch,
-  FaChevronRight
+  FaChevronRight,
+  FaUserPlus
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League } from '../../lib/supabase';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay } from 'date-fns';
 
 const LeaguesList = () => {
   const [leagues, setLeagues] = useState<League[]>([]);
@@ -27,15 +28,32 @@ const LeaguesList = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('leagues')
-      .select('*')
-      .order('start_date', { ascending: false });
+      .select('*');
     
     if (error) {
       console.error('Error fetching leagues:', error);
     } else {
-      setLeagues(data || []);
+      // Sort by date - upcoming/registration first (ascending), then completed (descending)
+      const sorted = (data || []).sort((a, b) => {
+        const dateA = a.date || a.start_date;
+        const dateB = b.date || b.start_date;
+        if (!dateA && !dateB) return 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return new Date(dateA).getTime() - new Date(dateB).getTime();
+      });
+      setLeagues(sorted);
     }
     setLoading(false);
+  };
+
+  // Helper to check if league date is in the future
+  const isUpcomingDate = (league: League): boolean => {
+    const leagueDate = league.date || league.start_date;
+    if (!leagueDate) return false;
+    const today = startOfDay(new Date());
+    const date = startOfDay(new Date(leagueDate));
+    return isAfter(date, today) || date.getTime() === today.getTime();
   };
 
   // Filter leagues
@@ -45,10 +63,39 @@ const LeaguesList = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Group by status for display
-  const activeLeagues = filteredLeagues.filter(l => ['registration', 'round_robin', 'knockouts'].includes(l.status));
-  const upcomingLeagues = filteredLeagues.filter(l => l.status === 'upcoming');
-  const completedLeagues = filteredLeagues.filter(l => l.status === 'completed');
+  // Group by status for display - only show "upcoming" section for leagues with future dates
+  const registrationOpenLeagues = filteredLeagues
+    .filter(l => l.status === 'registration')
+    .sort((a, b) => {
+      const dateA = a.date || a.start_date;
+      const dateB = b.date || b.start_date;
+      if (!dateA || !dateB) return 0;
+      return new Date(dateA).getTime() - new Date(dateB).getTime();
+    });
+  const activeLeagues = filteredLeagues
+    .filter(l => ['round_robin', 'knockouts', 'group_stage'].includes(l.status))
+    .sort((a, b) => {
+      const dateA = a.date || a.start_date;
+      const dateB = b.date || b.start_date;
+      if (!dateA || !dateB) return 0;
+      return new Date(dateA).getTime() - new Date(dateB).getTime();
+    });
+  const upcomingLeagues = filteredLeagues
+    .filter(l => l.status === 'upcoming' && isUpcomingDate(l))
+    .sort((a, b) => {
+      const dateA = a.date || a.start_date;
+      const dateB = b.date || b.start_date;
+      if (!dateA || !dateB) return 0;
+      return new Date(dateA).getTime() - new Date(dateB).getTime();
+    });
+  const completedLeagues = filteredLeagues
+    .filter(l => l.status === 'completed' || (l.status === 'upcoming' && !isUpcomingDate(l)))
+    .sort((a, b) => {
+      const dateA = a.date || a.start_date;
+      const dateB = b.date || b.start_date;
+      if (!dateA || !dateB) return 0;
+      return new Date(dateB).getTime() - new Date(dateA).getTime(); // Descending for past
+    });
 
   if (loading) {
     return (
@@ -105,12 +152,30 @@ const LeaguesList = () => {
             </div>
           </div>
 
+          {/* Registration Open - Most Prominent */}
+          {registrationOpenLeagues.length > 0 && (
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-xl p-6 mb-4">
+                <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+                  <FaUserPlus className="text-green-400 animate-bounce" />
+                  Registration Open - Join Now!
+                </h2>
+                <p className="text-gray-300">Sign up for these upcoming tournaments before spots fill up!</p>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {registrationOpenLeagues.map((league) => (
+                  <LeagueCard key={league.id} league={league} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Active Leagues */}
           {activeLeagues.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                Active Leagues
+                <span className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>
+                In Progress
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeLeagues.map((league) => (
@@ -184,13 +249,33 @@ const LeaguesList = () => {
 
 // League Card Component
 const LeagueCard = ({ league }: { league: League }) => {
+  // Check if league date is in the future
+  const isUpcomingDate = (): boolean => {
+    const leagueDate = league.date || league.start_date;
+    if (!leagueDate) return false;
+    const today = startOfDay(new Date());
+    const date = startOfDay(new Date(leagueDate));
+    return isAfter(date, today) || date.getTime() === today.getTime();
+  };
+
+  // Determine effective status based on date
+  const getEffectiveStatus = (): string => {
+    if (league.status === 'upcoming' && !isUpcomingDate()) {
+      return 'past'; // League date has passed but status wasn't updated
+    }
+    return league.status;
+  };
+
+  const effectiveStatus = getEffectiveStatus();
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming': return 'bg-gray-600 text-gray-200';
-      case 'registration': return 'bg-blue-600 text-white';
+      case 'upcoming': return 'bg-blue-600 text-white';
+      case 'registration': return 'bg-green-600 text-white';
       case 'round_robin': return 'bg-yellow-600 text-white';
       case 'knockouts': return 'bg-orange-600 text-white';
-      case 'completed': return 'bg-green-600 text-white';
+      case 'completed': return 'bg-gray-600 text-gray-200';
+      case 'past': return 'bg-gray-600 text-gray-200';
       case 'cancelled': return 'bg-red-600 text-white';
       default: return 'bg-gray-600 text-gray-200';
     }
@@ -203,6 +288,7 @@ const LeagueCard = ({ league }: { league: League }) => {
       case 'round_robin': return 'Round Robin';
       case 'knockouts': return 'Knockouts';
       case 'completed': return 'Completed';
+      case 'past': return 'Past';
       case 'cancelled': return 'Cancelled';
       default: return status;
     }
@@ -222,8 +308,8 @@ const LeagueCard = ({ league }: { league: League }) => {
           <h3 className="text-lg font-bold text-white group-hover:text-primary-blue transition line-clamp-2">
             {league.name}
           </h3>
-          <span className={`px-2 py-1 rounded text-xs font-semibold whitespace-nowrap ${getStatusColor(league.status)}`}>
-            {getStatusLabel(league.status)}
+          <span className={`px-2 py-1 rounded text-xs font-semibold whitespace-nowrap ${getStatusColor(effectiveStatus)}`}>
+            {getStatusLabel(effectiveStatus)}
           </span>
         </div>
         <div className="text-sm text-gray-400 space-y-2">
@@ -245,8 +331,17 @@ const LeagueCard = ({ league }: { league: League }) => {
              league.league_type === 'round_robin' ? 'Round Robin' : 'Knockouts'}
           </div>
         </div>
-        <div className="mt-4 pt-3 border-t border-gray-700 flex items-center justify-end text-primary-blue text-sm group-hover:underline">
-          View Details <FaChevronRight className="ml-1" />
+        <div className="mt-4 pt-3 border-t border-gray-700 flex items-center justify-between">
+          {league.status === 'registration' ? (
+            <span className="flex items-center gap-2 text-green-400 font-semibold animate-pulse">
+              <FaUserPlus /> Register Now!
+            </span>
+          ) : (
+            <span></span>
+          )}
+          <span className="flex items-center text-primary-blue text-sm group-hover:underline">
+            View Details <FaChevronRight className="ml-1" />
+          </span>
         </div>
       </Link>
     </motion.div>

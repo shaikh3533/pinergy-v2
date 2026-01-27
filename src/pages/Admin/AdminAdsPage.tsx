@@ -4,7 +4,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { Ad, League } from '../../lib/supabase';
 import AdminLayout from '../../components/Admin/AdminLayout';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay, isEqual } from 'date-fns';
 
 const AdminAdsPage = () => {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -31,7 +31,18 @@ const AdminAdsPage = () => {
     ]);
 
     if (adsRes.data) setAds(adsRes.data);
-    if (leaguesRes.data) setUpcomingLeagues(leaguesRes.data);
+    
+    // Filter to only show leagues with dates today or in the future
+    if (leaguesRes.data) {
+      const today = startOfDay(new Date());
+      const filteredLeagues = leaguesRes.data.filter(league => {
+        const leagueDate = league.date || league.start_date;
+        if (!leagueDate) return true; // Include if no date
+        const date = startOfDay(new Date(leagueDate));
+        return isAfter(date, today) || isEqual(date, today);
+      });
+      setUpcomingLeagues(filteredLeagues);
+    }
     
     setLoading(false);
   };

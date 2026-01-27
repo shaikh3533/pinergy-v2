@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { 
   FaTrophy, 
   FaCalendarAlt, 
@@ -8,17 +9,23 @@ import {
   FaTableTennis,
   FaChartLine,
   FaListOl,
-  FaClock
+  FaClock,
+  FaUserPlus,
+  FaCheck
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League, LeaguePlayer } from '../../lib/supabase';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay, isEqual } from 'date-fns';
+import { useAuthStore } from '../../store/authStore';
 
 const LeagueDetail = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
+  const { user } = useAuthStore();
   const [league, setLeague] = useState<League | null>(null);
   const [players, setPlayers] = useState<LeaguePlayer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
     if (leagueId) {
@@ -26,6 +33,103 @@ const LeagueDetail = () => {
       fetchPlayers();
     }
   }, [leagueId]);
+
+  // Check if user is already registered
+  useEffect(() => {
+    if (user && leagueId) {
+      checkRegistration();
+    }
+  }, [user, leagueId, players]);
+
+  const checkRegistration = () => {
+    const registered = players.some(p => p.player_id === user?.id);
+    setIsRegistered(registered);
+  };
+
+  const handleRegister = async () => {
+    if (!user) {
+      toast.error('Please sign in to register for tournaments');
+      return;
+    }
+    if (!league) return;
+    
+    if (players.length >= league.max_players) {
+      toast.error('This tournament is full');
+      return;
+    }
+
+    if (league.status !== 'registration') {
+      toast.error('Registration is not open for this tournament');
+      return;
+    }
+
+    setRegistering(true);
+    
+    console.log('Attempting to register user:', user.id, 'for league:', leagueId);
+    
+    try {
+      const { data, error } = await supabase
+        .from('league_players')
+        .insert({
+          league_id: leagueId,
+          player_id: user.id,
+          status: 'active',
+          wins: 0,
+          losses: 0,
+          points_for: 0,
+          points_against: 0,
+          point_difference: 0,
+        })
+        .select();
+
+      if (error) {
+        console.error('Registration error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        if (error.code === '23505') {
+          toast.error('You are already registered for this tournament');
+          setIsRegistered(true);
+        } else if (error.code === '42501') {
+          toast.error('Permission denied. Please run FIX_TOURNAMENT_RLS.sql in Supabase.');
+        } else {
+          toast.error(`Registration failed: ${error.message}`);
+        }
+      } else {
+        console.log('Registration successful:', data);
+        toast.success('Successfully registered for the tournament!');
+        setIsRegistered(true);
+        fetchPlayers();
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast.error('An unexpected error occurred');
+    }
+    
+    setRegistering(false);
+  };
+
+  const handleUnregister = async () => {
+    if (!user || !leagueId) return;
+    
+    if (!confirm('Are you sure you want to withdraw from this tournament?')) return;
+
+    const { error } = await supabase
+      .from('league_players')
+      .delete()
+      .eq('league_id', leagueId)
+      .eq('player_id', user.id);
+
+    if (error) {
+      toast.error('Failed to withdraw. Please try again.');
+    } else {
+      toast.success('You have withdrawn from the tournament');
+      setIsRegistered(false);
+      fetchPlayers();
+    }
+  };
 
   const fetchLeague = async () => {
     const { data, error } = await supabase
@@ -55,25 +159,47 @@ const LeagueDetail = () => {
     }
   };
 
+  // Check if league date is in the future or today
+  const isUpcomingDate = (): boolean => {
+    if (!league) return false;
+    const leagueDate = league.date || league.start_date;
+    if (!leagueDate) return true; // No date set, consider upcoming
+    const today = startOfDay(new Date());
+    const date = startOfDay(new Date(leagueDate));
+    return isAfter(date, today) || isEqual(date, today);
+  };
+
+  // Get effective status based on date
+  const getEffectiveStatus = (status: string): string => {
+    if (status === 'upcoming' && !isUpcomingDate()) {
+      return 'past';
+    }
+    return status;
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'bg-gray-600 text-gray-200';
-      case 'registration': return 'bg-blue-600 text-white';
+    const effectiveStatus = getEffectiveStatus(status);
+    switch (effectiveStatus) {
+      case 'upcoming': return 'bg-blue-600 text-white';
+      case 'registration': return 'bg-green-600 text-white';
       case 'round_robin': return 'bg-yellow-600 text-white';
       case 'knockouts': return 'bg-orange-600 text-white';
-      case 'completed': return 'bg-green-600 text-white';
+      case 'completed': return 'bg-gray-600 text-gray-200';
+      case 'past': return 'bg-gray-600 text-gray-200';
       case 'cancelled': return 'bg-red-600 text-white';
       default: return 'bg-gray-600 text-gray-200';
     }
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
+    const effectiveStatus = getEffectiveStatus(status);
+    switch (effectiveStatus) {
       case 'upcoming': return 'Upcoming';
       case 'registration': return 'Registration Open';
       case 'round_robin': return 'Round Robin in Progress';
       case 'knockouts': return 'Knockout Stage';
       case 'completed': return 'Completed';
+      case 'past': return 'Past';
       case 'cancelled': return 'Cancelled';
       default: return status;
     }
@@ -117,6 +243,46 @@ const LeagueDetail = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
+          {/* Registration Banner - Very Prominent */}
+          {league.status === 'registration' && (
+            <div className="mb-6 bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 text-center">
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-3">
+                <FaUserPlus className="animate-bounce" />
+                Registration is OPEN!
+              </h2>
+              <p className="text-white/90 mb-4">
+                {players.length} / {league.max_players} players registered. 
+                {league.max_players - players.length > 0 
+                  ? ` ${league.max_players - players.length} spots remaining!`
+                  : ' Tournament is full!'}
+              </p>
+              {!user ? (
+                <Link
+                  to="/auth/signin"
+                  className="inline-block px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition transform hover:scale-105"
+                >
+                  Sign In to Register
+                </Link>
+              ) : isRegistered ? (
+                <span className="inline-block px-6 py-3 bg-white/20 text-white font-bold rounded-lg">
+                  ✓ You are registered!
+                </span>
+              ) : players.length >= league.max_players ? (
+                <span className="inline-block px-6 py-3 bg-gray-600 text-gray-300 font-bold rounded-lg">
+                  Tournament Full
+                </span>
+              ) : (
+                <button
+                  onClick={handleRegister}
+                  disabled={registering}
+                  className="inline-block px-6 py-3 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-600 text-black font-bold rounded-lg transition transform hover:scale-105"
+                >
+                  {registering ? 'Registering...' : 'Register Now!'}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Header */}
           <div className="card mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -129,7 +295,60 @@ const LeagueDetail = () => {
                   {getStatusLabel(league.status)}
                 </span>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
+                {/* Registration Button - Show for registration status */}
+                {league.status === 'registration' ? (
+                  <>
+                    {!user ? (
+                      <Link
+                        to="/auth/signin"
+                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-lg flex items-center gap-2 transition animate-pulse"
+                      >
+                        <FaUserPlus /> Sign in to Register
+                      </Link>
+                    ) : isRegistered ? (
+                      <button
+                        onClick={handleUnregister}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition"
+                      >
+                        <FaCheck /> Registered (Click to Withdraw)
+                      </button>
+                    ) : players.length >= league.max_players ? (
+                      <span className="px-4 py-2 bg-gray-700 text-gray-400 rounded-lg">
+                        Tournament Full
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleRegister}
+                        disabled={registering}
+                        className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-600 text-black font-semibold rounded-lg flex items-center gap-2 transition animate-pulse"
+                      >
+                        {registering ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black"></div>
+                        ) : (
+                          <FaUserPlus />
+                        )}
+                        Register Now
+                      </button>
+                    )}
+                  </>
+                ) : league.status === 'upcoming' && isUpcomingDate() ? (
+                  <span className="px-4 py-2 bg-blue-900/50 text-blue-300 rounded-lg flex items-center gap-2 border border-blue-600">
+                    <FaClock /> Registration Opening Soon
+                  </span>
+                ) : league.status === 'upcoming' && !isUpcomingDate() ? (
+                  <span className="px-4 py-2 bg-gray-700 text-gray-400 rounded-lg flex items-center gap-2">
+                    Event Date Passed
+                  </span>
+                ) : ['round_robin', 'knockouts', 'group_stage'].includes(league.status) ? (
+                  <span className="px-4 py-2 bg-yellow-900/50 text-yellow-300 rounded-lg flex items-center gap-2 border border-yellow-600">
+                    <FaTableTennis /> Tournament In Progress
+                  </span>
+                ) : league.status === 'completed' ? (
+                  <span className="px-4 py-2 bg-green-900/50 text-green-300 rounded-lg flex items-center gap-2 border border-green-600">
+                    <FaTrophy /> Tournament Completed
+                  </span>
+                ) : null}
                 <Link
                   to={`/leagues/${leagueId}/matches`}
                   className="px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition"

@@ -5,7 +5,7 @@ import { FaTrophy, FaCalendarAlt, FaUsers, FaChevronRight } from 'react-icons/fa
 import { supabase } from '../lib/supabase';
 import type { Ad, League } from '../lib/supabase';
 import { formatDate } from '../utils/dateUtils';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay, isEqual } from 'date-fns';
 
 const Ads = () => {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -24,7 +24,27 @@ const Ads = () => {
       ]);
 
       if (adsRes.data) setAds(adsRes.data);
-      if (leaguesRes.data) setUpcomingLeagues(leaguesRes.data);
+      
+      // Filter to only include leagues with dates today or in the future
+      if (leaguesRes.data) {
+        const today = startOfDay(new Date());
+        const filteredLeagues = leaguesRes.data.filter(league => {
+          const leagueDate = league.date || league.start_date;
+          if (!leagueDate) return true; // Include if no date set
+          const date = startOfDay(new Date(leagueDate));
+          return isAfter(date, today) || isEqual(date, today);
+        });
+        // Sort by date ascending
+        filteredLeagues.sort((a, b) => {
+          const dateA = a.date || a.start_date;
+          const dateB = b.date || b.start_date;
+          if (!dateA && !dateB) return 0;
+          if (!dateA) return 1;
+          if (!dateB) return -1;
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        });
+        setUpcomingLeagues(filteredLeagues);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -82,7 +102,7 @@ const Ads = () => {
                             ? 'bg-green-600 text-white'
                             : 'bg-blue-600 text-white'
                         }`}>
-                          {league.status === 'registration' ? 'Registration Open' : 'Coming Soon'}
+                          {league.status === 'registration' ? 'Registration Open' : 'Upcoming'}
                         </span>
                       </div>
 

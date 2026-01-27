@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League, LeaguePlayer, User, LeagueStatus } from '../../lib/supabase';
-import { format } from 'date-fns';
+import { format, isAfter, startOfDay, isEqual } from 'date-fns';
 
 interface CreateLeagueForm {
   name: string;
@@ -361,19 +361,36 @@ const AdminTournaments = () => {
     }
   };
 
-  const getStatusColor = (status: LeagueStatus) => {
+  // Check if a league date is in the future
+  const isLeagueDateUpcoming = (league: League): boolean => {
+    const leagueDate = league.date || league.start_date;
+    if (!leagueDate) return true;
+    const today = startOfDay(new Date());
+    const date = startOfDay(new Date(leagueDate));
+    return isAfter(date, today) || isEqual(date, today);
+  };
+
+  const getStatusColor = (status: LeagueStatus, league?: League) => {
+    // If status is upcoming but date has passed, show as past
+    if (status === 'upcoming' && league && !isLeagueDateUpcoming(league)) {
+      return 'bg-gray-500';
+    }
     switch (status) {
-      case 'upcoming': return 'bg-gray-600';
-      case 'registration': return 'bg-blue-600';
+      case 'upcoming': return 'bg-blue-600';
+      case 'registration': return 'bg-green-600';
       case 'round_robin': return 'bg-yellow-600';
       case 'knockouts': return 'bg-orange-600';
-      case 'completed': return 'bg-green-600';
+      case 'completed': return 'bg-gray-600';
       case 'cancelled': return 'bg-red-600';
       default: return 'bg-gray-600';
     }
   };
 
-  const getStatusLabel = (status: LeagueStatus) => {
+  const getStatusLabel = (status: LeagueStatus, league?: League) => {
+    // If status is upcoming but date has passed, show as past
+    if (status === 'upcoming' && league && !isLeagueDateUpcoming(league)) {
+      return 'Date Passed';
+    }
     switch (status) {
       case 'upcoming': return 'Upcoming';
       case 'registration': return 'Registration Open';
@@ -464,8 +481,8 @@ const AdminTournaments = () => {
                     <h3 className="text-lg font-bold text-white group-hover:text-primary-blue transition">
                       {league.name}
                     </h3>
-                    <span className={`px-2 py-1 rounded text-xs text-white ${getStatusColor(league.status)}`}>
-                      {getStatusLabel(league.status)}
+                    <span className={`px-2 py-1 rounded text-xs text-white ${getStatusColor(league.status, league)}`}>
+                      {getStatusLabel(league.status, league)}
                     </span>
                   </div>
                   <div className="text-sm text-gray-400 space-y-1">
@@ -687,8 +704,8 @@ const AdminTournaments = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-2xl font-bold text-white">{selectedLeague.name}</h3>
-                <span className={`inline-block mt-2 px-3 py-1 rounded text-sm text-white ${getStatusColor(selectedLeague.status)}`}>
-                  {getStatusLabel(selectedLeague.status)}
+                <span className={`inline-block mt-2 px-3 py-1 rounded text-sm text-white ${getStatusColor(selectedLeague.status, selectedLeague)}`}>
+                  {getStatusLabel(selectedLeague.status, selectedLeague)}
                 </span>
               </div>
               <div className="flex gap-2">
