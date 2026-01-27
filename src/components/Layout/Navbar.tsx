@@ -17,7 +17,8 @@ import {
   FaTrophy,
   FaChartLine,
   FaCog,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaShoppingCart
 } from 'react-icons/fa';
 import logoImage from '../../assets/spinergy_logo.png';
 
@@ -61,6 +62,7 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', icon: <FaHome />, label: 'Home' },
     { to: '/book', icon: <FaCalendarAlt />, label: 'Book Slot' },
+    { to: '/store', icon: <FaShoppingCart />, label: 'Store' },
     { to: '/coaches', icon: <FaUserTie />, label: 'Coaches' },
     { to: '/leagues', icon: <FaTrophy />, label: 'Leagues' },
     { to: '/gallery', icon: <FaImages />, label: 'Gallery' },

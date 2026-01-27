@@ -370,3 +370,91 @@ export interface CoachingSession {
   updated_at: string;
   coach?: Coach;
 }
+
+// ================================================================
+// STORE TYPES
+// ================================================================
+
+export type ProductCategory = 'balls' | 'blades' | 'rubbers' | 'accessories';
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'completed' | 'cancelled';
+
+export interface ProductSpecifications {
+  speed?: number; // 1-10 rating
+  spin?: number; // 1-10 rating
+  control?: number; // 1-10 rating
+  weight?: string; // e.g., "85g", "Medium"
+  thickness?: string; // For rubbers e.g., "2.0mm"
+  ply?: string; // For blades e.g., "5-ply", "7-ply"
+  material?: string; // e.g., "Carbon", "Wood"
+  color?: string;
+  quantity?: string; // e.g., "3 balls/pack"
+  [key: string]: string | number | undefined; // Allow custom specs
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug?: string;
+  category: ProductCategory;
+  brand?: string;
+  description?: string;
+  specifications: ProductSpecifications;
+  price: number;
+  sale_price?: number;
+  currency: string;
+  stock_quantity: number;
+  is_available: boolean;
+  is_featured: boolean;
+  display_order: number;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  images?: ProductImage[];
+}
+
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  is_primary: boolean;
+  display_order: number;
+  created_at: string;
+}
+
+export interface CartItem {
+  id: string;
+  user_id?: string;
+  session_id?: string;
+  product_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+  product?: Product;
+}
+
+export interface OrderItem {
+  product_id: string;
+  product_name: string;
+  product_category: ProductCategory;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  image_url?: string;
+}
+
+export interface Order {
+  id: string;
+  order_number: string;
+  user_id?: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  customer_address?: string;
+  items: OrderItem[];
+  subtotal: number;
+  total: number;
+  notes?: string;
+  status: OrderStatus;
+  created_at: string;
+  updated_at: string;
+}

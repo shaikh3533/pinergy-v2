@@ -15,6 +15,7 @@ import Contact from './pages/Contact';
 import Suggestions from './pages/Suggestions';
 import Gallery from './pages/Gallery';
 import Coaches from './pages/Coaches';
+import Store from './pages/Store';
 import SignIn from './pages/Auth/SignIn';
 import SignUp from './pages/Auth/SignUp';
 
@@ -35,6 +36,7 @@ import AdminGallery from './pages/Admin/AdminGallery';
 import AdminAdsPage from './pages/Admin/AdminAdsPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 import AdminCoaches from './pages/Admin/AdminCoaches';
+import AdminStore from './pages/Admin/AdminStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +87,7 @@ function App() {
           <Route element={<Layout><Suggestions /></Layout>} path="/suggestions" />
           <Route element={<Layout><Gallery /></Layout>} path="/gallery" />
           <Route element={<Layout><Coaches /></Layout>} path="/coaches" />
+          <Route element={<Layout><Store /></Layout>} path="/store" />
           <Route element={<Layout><SignIn /></Layout>} path="/auth/signin" />
           <Route element={<Layout><SignUp /></Layout>} path="/auth/signup" />
           
@@ -177,6 +180,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminCoaches />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/store"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminStore />
               </ProtectedRoute>
             }
           />
