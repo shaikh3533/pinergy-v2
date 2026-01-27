@@ -58,8 +58,6 @@ const LeagueStandings = () => {
       .eq('league_id', leagueId)
       .eq('status', 'completed');
 
-    setMatches(matchesData || []);
-
     // Calculate standings with tie-breakers
     if (playersData) {
       const standingsWithH2H = playersData.map(player => {

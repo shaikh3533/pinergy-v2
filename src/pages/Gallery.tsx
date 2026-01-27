@@ -321,7 +321,6 @@ const Gallery = () => {
                         item={item}
                         index={index}
                         onClick={() => setSelectedItem(item)}
-                        featured
                       />
                     ))}
                   </div>
