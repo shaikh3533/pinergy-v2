@@ -46,7 +46,6 @@ const Dashboard = () => {
     confirmPassword: '',
   });
   const [changingPassword, setChangingPassword] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   useEffect(() => {
