@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { FaPlus, FaTrash, FaWhatsapp, FaPhone, FaWalking, FaTrophy } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { User, Booking, Ad } from '../../lib/supabase';
 import { formatDate } from '../../utils/dateUtils';
 import { getLevelBadgeColor, calculateLevel } from '../../utils/ratingSystem';
 import AdminSettings from './Settings';
+import AdminBooking from './AdminBooking';
+import AdminTournaments from './AdminTournaments';
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'bookings' | 'ads' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'bookings' | 'add-booking' | 'tournaments' | 'ads' | 'settings'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [ads, setAds] = useState<Ad[]>([]);
@@ -128,11 +131,40 @@ const Admin = () => {
     try {
       const { error } = await supabase.from('ads').delete().eq('id', adId);
       if (error) throw error;
-      toast.success('Ad deleted successfully! 🗑️');
+      toast.success('Ad deleted successfully!');
       fetchData();
     } catch (error) {
       console.error('Error deleting ad:', error);
       toast.error('Failed to delete ad');
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete the booking for ${userName}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.from('bookings').delete().eq('id', bookingId);
+      if (error) throw error;
+      toast.success('Booking deleted successfully!');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      toast.error('Failed to delete booking');
+    }
+  };
+
+  const getBookingSourceIcon = (source?: string) => {
+    switch (source) {
+      case 'whatsapp':
+        return <FaWhatsapp className="text-green-500" title="WhatsApp booking" />;
+      case 'phone':
+        return <FaPhone className="text-blue-500" title="Phone booking" />;
+      case 'walkin':
+        return <FaWalking className="text-purple-500" title="Walk-in booking" />;
+      default:
+        return <span className="text-gray-500 text-xs">Online</span>;
     }
   };
 
@@ -149,10 +181,10 @@ const Admin = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mb-8 justify-center">
+          <div className="flex flex-wrap gap-3 mb-8 justify-center">
             <button
               onClick={() => setActiveTab('users')}
-              className={`px-6 py-3 rounded-lg font-semibold transition ${
+              className={`px-5 py-3 rounded-lg font-semibold transition ${
                 activeTab === 'users'
                   ? 'bg-primary-blue text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -162,7 +194,7 @@ const Admin = () => {
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
-              className={`px-6 py-3 rounded-lg font-semibold transition ${
+              className={`px-5 py-3 rounded-lg font-semibold transition ${
                 activeTab === 'bookings'
                   ? 'bg-primary-blue text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -171,8 +203,28 @@ const Admin = () => {
               Bookings
             </button>
             <button
+              onClick={() => setActiveTab('add-booking')}
+              className={`px-5 py-3 rounded-lg font-semibold transition flex items-center gap-2 ${
+                activeTab === 'add-booking'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-800 text-green-200 hover:bg-green-700'
+              }`}
+            >
+              <FaPlus /> Add Booking
+            </button>
+            <button
+              onClick={() => setActiveTab('tournaments')}
+              className={`px-5 py-3 rounded-lg font-semibold transition flex items-center gap-2 ${
+                activeTab === 'tournaments'
+                  ? 'bg-yellow-600 text-white'
+                  : 'bg-yellow-800 text-yellow-200 hover:bg-yellow-700'
+              }`}
+            >
+              <FaTrophy /> Tournaments
+            </button>
+            <button
               onClick={() => setActiveTab('ads')}
-              className={`px-6 py-3 rounded-lg font-semibold transition ${
+              className={`px-5 py-3 rounded-lg font-semibold transition ${
                 activeTab === 'ads'
                   ? 'bg-primary-blue text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
@@ -182,13 +234,13 @@ const Admin = () => {
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-6 py-3 rounded-lg font-semibold transition ${
+              className={`px-5 py-3 rounded-lg font-semibold transition ${
                 activeTab === 'settings'
                   ? 'bg-primary-blue text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
-              ⚙️ Settings
+              Settings
             </button>
           </div>
 
@@ -271,50 +323,88 @@ const Admin = () => {
               {/* Bookings Tab */}
               {activeTab === 'bookings' && (
                 <div className="card">
-                  <h2 className="text-2xl font-bold text-white mb-6">All Bookings</h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white">All Bookings</h2>
+                    <button
+                      onClick={() => setActiveTab('add-booking')}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition"
+                    >
+                      <FaPlus /> Add Booking
+                    </button>
+                  </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-gray-700">
-                          <th className="text-left py-3 px-4 text-gray-400">User</th>
-                          <th className="text-left py-3 px-4 text-gray-400">Table</th>
-                          <th className="text-left py-3 px-4 text-gray-400">Date & Time</th>
-                          <th className="text-left py-3 px-4 text-gray-400">Duration</th>
-                          <th className="text-left py-3 px-4 text-gray-400">Coaching</th>
-                          <th className="text-left py-3 px-4 text-gray-400">Price</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Source</th>
+                          <th className="text-left py-3 px-3 text-gray-400">User</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Table</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Date & Time</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Duration</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Price</th>
+                          <th className="text-left py-3 px-3 text-gray-400">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {bookings.map((booking) => (
                           <tr key={booking.id} className="border-b border-gray-800 hover:bg-gray-800">
-                            <td className="py-3 px-4 text-white">
+                            <td className="py-3 px-3">
+                              {getBookingSourceIcon((booking as any).booking_source)}
+                            </td>
+                            <td className="py-3 px-3 text-white">
                               {(booking.user as any)?.name || 'Unknown'}
                             </td>
-                            <td className="py-3 px-4 text-gray-300">{booking.table_type}</td>
-                            <td className="py-3 px-4 text-gray-300">
+                            <td className="py-3 px-3 text-gray-300">
+                              {booking.table_id === 'table_a' ? 'Table A' : 
+                               booking.table_id === 'table_b' ? 'Table B' : 
+                               booking.table_type}
+                            </td>
+                            <td className="py-3 px-3 text-gray-300">
                               {formatDate(booking.date)}<br />
                               <span className="text-xs">{booking.start_time} - {booking.end_time}</span>
                             </td>
-                            <td className="py-3 px-4 text-gray-300">
+                            <td className="py-3 px-3 text-gray-300">
                               {booking.slot_duration} min
                             </td>
-                            <td className="py-3 px-4">
-                              {booking.coaching ? (
-                                <span className="text-green-400">Yes</span>
-                              ) : (
-                                <span className="text-gray-500">No</span>
-                              )}
+                            <td className="py-3 px-3 text-primary-blue font-bold">
+                              PKR {booking.price}
                             </td>
-                            <td className="py-3 px-4 text-primary-blue font-bold">
-                              ₹{booking.price}
+                            <td className="py-3 px-3">
+                              <button
+                                onClick={() => handleDeleteBooking(booking.id, (booking.user as any)?.name || 'Unknown')}
+                                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition"
+                                title="Delete booking"
+                              >
+                                <FaTrash />
+                              </button>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                    {bookings.length === 0 && (
+                      <div className="text-center text-gray-400 py-8">
+                        No bookings found.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
+
+              {/* Add Booking Tab */}
+              {activeTab === 'add-booking' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-6">Add New Booking</h2>
+                  <p className="text-gray-400 mb-6">
+                    Use this form to manually add bookings for customers who contact via WhatsApp, phone, or walk-in.
+                    The selected slots will be reserved and won't appear to other users.
+                  </p>
+                  <AdminBooking />
+                </div>
+              )}
+
+              {/* Tournaments Tab */}
+              {activeTab === 'tournaments' && <AdminTournaments />}
 
               {/* Ads Tab */}
               {activeTab === 'ads' && (

@@ -3,140 +3,213 @@ import {
   FaInstagram, 
   FaFacebook, 
   FaTiktok, 
+  FaYoutube,
+  FaWhatsapp,
   FaEnvelope, 
   FaPhone, 
   FaMapMarkerAlt,
-  FaTableTennis
+  FaTableTennis,
+  FaHeart,
+  FaTrophy,
+  FaCalendarAlt,
+  FaStar,
+  FaImages,
+  FaUserTie
 } from 'react-icons/fa';
 import logoImage from '../../assets/primary white variant logo.jpeg';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer 
-      className="bg-black border-t border-gray-800 mt-auto relative"
-      style={{
-        boxShadow: '0 -2px 20px rgba(74, 134, 247, 0.1), 0 -1px 10px rgba(74, 134, 247, 0.15)'
-      }}
-    >
+    <footer className="bg-gray-950 border-t border-gray-800/50 mt-auto">
+      {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center space-x-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          {/* Brand Section */}
+          <div className="lg:col-span-2">
+            <Link to="/" className="flex items-center gap-3 mb-4">
               <img 
                 src={logoImage} 
                 alt="SPINERGY Logo" 
-                className="h-12 w-auto"
+                className="h-14 w-auto rounded-lg"
               />
-              <span className="text-xl font-bold text-white tracking-wider">
-                SPINERGY
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm mb-4">
-              Premium table tennis club with professional DC-700 and Tibhar tables in Lahore.
+              <div>
+                <span className="text-2xl font-bold text-white tracking-wider">
+                  SPINERGY
+                </span>
+                <p className="text-xs text-gray-500">Table Tennis Club</p>
+              </div>
+            </Link>
+            <p className="text-gray-400 text-sm mb-6 max-w-sm">
+              Premium table tennis club in Lahore featuring professional-grade DC-700 and Tibhar tables. 
+              Join us for training, tournaments, and endless fun!
             </p>
             
-            {/* Social Media Links */}
-            <div className="flex gap-4 mt-4">
+            {/* Social Media */}
+            <div className="flex gap-3">
               <a
-                href="https://www.instagram.com/spinergy_?igsh=MXVpYWRpeTJxOWc5YQ=="
+                href="https://www.instagram.com/spinergy_"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-pink-500 transition-colors"
+                className="w-10 h-10 bg-gray-800 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-500 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
                 aria-label="Instagram"
               >
-                <FaInstagram size={24} />
+                <FaInstagram size={20} />
               </a>
               <a
                 href="https://www.facebook.com/share/1Gdv7HipVj/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
+                className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
                 aria-label="Facebook"
               >
-                <FaFacebook size={24} />
+                <FaFacebook size={20} />
               </a>
               <a
                 href="https://vt.tiktok.com/ZSyXMaGdn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="w-10 h-10 bg-gray-800 hover:bg-black rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
                 aria-label="TikTok"
               >
-                <FaTiktok size={24} />
+                <FaTiktok size={20} />
+              </a>
+              <a
+                href="https://wa.me/923259898900"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 hover:bg-green-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
+                aria-label="WhatsApp"
+              >
+                <FaWhatsapp size={20} />
               </a>
             </div>
           </div>
 
+          {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+              Quick Links
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { to: '/', icon: <FaTableTennis />, label: 'Home' },
+                { to: '/book', icon: <FaCalendarAlt />, label: 'Book Slot' },
+                { to: '/coaches', icon: <FaUserTie />, label: 'Our Coaches' },
+                { to: '/ratings', icon: <FaStar />, label: 'Ratings' },
+                { to: '/gallery', icon: <FaImages />, label: 'Gallery' },
+              ].map((link) => (
+                <li key={link.to}>
+                  <Link 
+                    to={link.to} 
+                    className="text-gray-400 hover:text-primary-blue text-sm flex items-center gap-2 transition"
+                  >
+                    {link.icon} {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tournaments */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+              Tournaments
+            </h3>
+            <ul className="space-y-3">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white text-sm transition">
-                  Home
+                <Link to="/leagues" className="text-gray-400 hover:text-primary-blue text-sm flex items-center gap-2 transition">
+                  <FaTrophy /> Active Leagues
                 </Link>
               </li>
               <li>
-                <Link to="/book" className="text-gray-400 hover:text-white text-sm transition">
-                  Book Slot
+                <Link to="/rankings" className="text-gray-400 hover:text-primary-blue text-sm flex items-center gap-2 transition">
+                  <FaStar /> Global Rankings
                 </Link>
               </li>
               <li>
-                <Link to="/ratings" className="text-gray-400 hover:text-white text-sm transition">
-                  Ratings
+                <Link to="/ads" className="text-gray-400 hover:text-primary-blue text-sm flex items-center gap-2 transition">
+                  <FaCalendarAlt /> Events
                 </Link>
               </li>
               <li>
-                <Link to="/rules" className="text-gray-400 hover:text-white text-sm transition">
-                  Rules
-                </Link>
-              </li>
-              <li>
-                <Link to="/suggestions" className="text-gray-400 hover:text-white text-sm transition">
-                  Feedback
+                <Link to="/rules" className="text-gray-400 hover:text-primary-blue text-sm flex items-center gap-2 transition">
+                  <FaTableTennis /> Rules & Scoring
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Our Tables</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li className="flex items-center gap-2">
-                <FaTableTennis className="text-primary-blue" />
-                DC-700 (Professional 25mm)
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+              Contact Us
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <FaMapMarkerAlt className="text-primary-blue mt-0.5" />
+                <span className="text-gray-400 text-sm">
+                  15-Commercial,<br />
+                  Suny Park, Lahore
+                </span>
               </li>
-              <li className="flex items-center gap-2">
-                <FaTableTennis className="text-primary-blue" />
-                Tibhar (Professional 25mm)
+              <li>
+                <a 
+                  href="tel:+923259898900"
+                  className="text-gray-400 hover:text-white text-sm flex items-center gap-3 transition"
+                >
+                  <FaPhone className="text-primary-blue" />
+                  0325-9898900
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="mailto:spinergy.info@gmail.com"
+                  className="text-gray-400 hover:text-white text-sm flex items-center gap-3 transition"
+                >
+                  <FaEnvelope className="text-primary-blue" />
+                  spinergy.info@gmail.com
+                </a>
               </li>
             </ul>
-          </div>
 
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contact</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li className="flex items-center gap-2">
-                <FaEnvelope className="text-primary-blue" />
-                spinergy.info@gmail.com
-              </li>
-              <li className="flex items-center gap-2">
-                <FaPhone className="text-primary-blue" />
-                0325-9898900
-              </li>
-              <li className="flex items-center gap-2">
-                <FaMapMarkerAlt className="text-primary-blue" />
-                Suny Park, Lahore
-              </li>
-            </ul>
+            {/* Hours */}
+            <div className="mt-4 p-3 bg-gray-900 rounded-lg">
+              <h4 className="text-xs text-gray-500 uppercase mb-2">Opening Hours</h4>
+              <p className="text-sm text-white">Mon - Sun: 2PM - 11PM</p>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="text-center text-gray-400 text-sm mb-4">
-            <p>Follow us on social media for updates and tournaments!</p>
-          </div>
-          <div className="text-center text-gray-400 text-sm">
-            <p>&copy; {new Date().getFullYear()} 15-Commercial SPINERGY Club. All rights reserved.</p>
+      {/* Bottom Bar */}
+      <div className="border-t border-gray-800/50 bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            {/* Copyright */}
+            <div className="text-center md:text-left">
+              <p className="text-gray-500 text-sm">
+                &copy; {currentYear} <span className="text-white font-semibold">SPINERGY</span> Table Tennis Club. 
+                All rights reserved.
+              </p>
+              <p className="text-gray-600 text-xs mt-1">
+                Made with <FaHeart className="inline text-red-500 mx-1" /> in Lahore, Pakistan
+              </p>
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex items-center gap-6 text-sm">
+              <Link to="/rules" className="text-gray-500 hover:text-gray-300 transition">
+                Terms & Conditions
+              </Link>
+              <Link to="/contact" className="text-gray-500 hover:text-gray-300 transition">
+                Privacy Policy
+              </Link>
+              <Link to="/suggestions" className="text-gray-500 hover:text-gray-300 transition">
+                Support
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -145,4 +218,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
