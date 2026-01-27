@@ -6,7 +6,7 @@ import {
   FaTrophy, 
   FaCheckCircle 
 } from 'react-icons/fa';
-import logoImage from '../assets/primary white variant logo.jpeg';
+import logoImage from '../assets/spinergy_logo.png';
 import tibharImage from '../assets/tibhar.png';
 import dc700Image from '../assets/dc-700.png';
 

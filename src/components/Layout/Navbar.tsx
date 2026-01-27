@@ -19,7 +19,7 @@ import {
   FaCog,
   FaSignOutAlt
 } from 'react-icons/fa';
-import logoImage from '../../assets/primary white variant logo.jpeg';
+import logoImage from '../../assets/spinergy_logo.png';
 
 interface NavLinkProps {
   to: string;

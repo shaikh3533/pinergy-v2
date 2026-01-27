@@ -13,11 +13,11 @@ import {
   FaBars,
   FaTimes,
   FaSignOutAlt,
-  FaTableTennis,
   FaHome,
   FaChevronLeft
 } from 'react-icons/fa';
 import { useAuthStore } from '../../store/authStore';
+import logoImage from '../../assets/spinergy_logo.png';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -77,7 +77,7 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
             {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
           <div className="flex items-center gap-2">
-            <FaTableTennis className="text-primary-blue text-xl" />
+            <img src={logoImage} alt="Spinergy" className="w-8 h-8 object-contain" />
             <span className="font-bold text-white">Admin</span>
           </div>
           <Link to="/" className="p-2 text-gray-400 hover:text-white transition">
@@ -111,9 +111,7 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
           >
             <div className="p-4 border-b border-gray-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary-blue rounded-lg flex items-center justify-center">
-                  <FaTableTennis className="text-white text-xl" />
-                </div>
+                <img src={logoImage} alt="Spinergy" className="w-10 h-10 object-contain" />
                 <div>
                   <div className="font-bold text-white">SPINERGY</div>
                   <div className="text-xs text-gray-400">Admin Portal</div>
@@ -170,9 +168,7 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
         {/* Logo */}
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-blue rounded-lg flex items-center justify-center flex-shrink-0">
-              <FaTableTennis className="text-white text-xl" />
-            </div>
+            <img src={logoImage} alt="Spinergy" className="w-10 h-10 object-contain flex-shrink-0" />
             {sidebarOpen && (
               <motion.div
                 initial={{ opacity: 0 }}

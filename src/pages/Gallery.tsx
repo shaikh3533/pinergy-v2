@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import type { GalleryItem, GalleryCategory } from '../lib/supabase';
-import logoImage from '../assets/primary white variant logo.jpeg';
+import logoImage from '../assets/spinergy_logo.png';
 
 // Default thumbnail for Google Drive content
 const DEFAULT_THUMBNAIL = logoImage;

@@ -15,7 +15,7 @@ import {
   FaUpload,
   FaYoutube
 } from 'react-icons/fa';
-import logoImage from '../../assets/primary white variant logo.jpeg';
+import logoImage from '../../assets/spinergy_logo.png';
 import { supabase } from '../../lib/supabase';
 import type { GalleryItem, GalleryCategory, MediaType, ObjectFitType, AspectRatioType } from '../../lib/supabase';
 import AdminLayout from '../../components/Admin/AdminLayout';

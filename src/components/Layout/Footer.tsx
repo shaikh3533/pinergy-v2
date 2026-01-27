@@ -15,7 +15,7 @@ import {
   FaImages,
   FaUserTie
 } from 'react-icons/fa';
-import logoImage from '../../assets/primary white variant logo.jpeg';
+import logoImage from '../../assets/spinergy_logo.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
