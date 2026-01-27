@@ -18,6 +18,7 @@ import Coaches from './pages/Coaches';
 import Store from './pages/Store';
 import SignIn from './pages/Auth/SignIn';
 import SignUp from './pages/Auth/SignUp';
+import ResetPassword from './pages/Auth/ResetPassword';
 
 // League Pages
 import LeaguesList from './pages/Leagues/LeaguesList';
@@ -90,6 +91,7 @@ function App() {
           <Route element={<Layout><Store /></Layout>} path="/store" />
           <Route element={<Layout><SignIn /></Layout>} path="/auth/signin" />
           <Route element={<Layout><SignUp /></Layout>} path="/auth/signup" />
+          <Route element={<Layout><ResetPassword /></Layout>} path="/auth/reset-password" />
           
           {/* League Routes (with Layout) */}
           <Route element={<Layout><LeaguesList /></Layout>} path="/leagues" />

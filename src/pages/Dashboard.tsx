@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { FaEdit, FaTimes, FaSave, FaTrophy } from 'react-icons/fa';
+import { FaEdit, FaTimes, FaSave, FaTrophy, FaKey, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import type { Booking, Match, LeagueMatch } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
@@ -37,6 +37,17 @@ const Dashboard = () => {
     phone: '',
   });
   const [saving, setSaving] = useState(false);
+
+  // Password change state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -147,6 +158,39 @@ const Dashboard = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword,
+      });
+
+      if (error) {
+        toast.error(`Failed to change password: ${error.message}`);
+      } else {
+        toast.success('Password changed successfully!');
+        setShowPasswordModal(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (err) {
+      console.error('Error changing password:', err);
+      toast.error('An unexpected error occurred');
+    }
+
+    setChangingPassword(false);
   };
 
   const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,6 +343,13 @@ const Dashboard = () => {
                     title="Edit profile"
                   >
                     <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => setShowPasswordModal(true)}
+                    className="p-2 bg-gray-700 hover:bg-yellow-600 text-gray-300 hover:text-white rounded-lg transition"
+                    title="Change password"
+                  >
+                    <FaKey />
                   </button>
                 </div>
                 <p className="text-gray-400 mb-1">{user.email}</p>
@@ -574,6 +625,98 @@ const Dashboard = () => {
                   <FaSave />
                 )}
                 Save Changes
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gray-900 rounded-2xl w-full max-w-md"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <FaKey className="text-yellow-500" /> Change Password
+              </h3>
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                }}
+                className="p-2 text-gray-400 hover:text-white transition"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="label">New Password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="input-field pr-10"
+                    placeholder="Enter new password (min 6 characters)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Confirm New Password</label>
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  className="input-field"
+                  placeholder="Re-enter new password"
+                />
+              </div>
+
+              {passwordForm.newPassword && passwordForm.confirmPassword && 
+                passwordForm.newPassword !== passwordForm.confirmPassword && (
+                <p className="text-red-400 text-sm">Passwords do not match</p>
+              )}
+
+              {passwordForm.newPassword && passwordForm.newPassword.length < 6 && (
+                <p className="text-yellow-400 text-sm">Password must be at least 6 characters</p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-800">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                }}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePassword}
+                disabled={changingPassword || passwordForm.newPassword.length < 6 || passwordForm.newPassword !== passwordForm.confirmPassword}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 text-white rounded-lg flex items-center gap-2 transition"
+              >
+                {changingPassword ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                ) : (
+                  <FaKey />
+                )}
+                Change Password
               </button>
             </div>
           </motion.div>
