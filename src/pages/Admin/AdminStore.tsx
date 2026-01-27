@@ -10,13 +10,11 @@ import {
   FaSave,
   FaTableTennis,
   FaStar,
-  FaTag,
-  FaCheck,
   FaEye,
   FaEyeSlash
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
-import type { Product, ProductImage, ProductCategory, ProductSpecifications } from '../../lib/supabase';
+import type { Product, ProductCategory, ProductSpecifications } from '../../lib/supabase';
 import AdminLayout from '../../components/Admin/AdminLayout';
 
 const CATEGORIES: { value: ProductCategory; label: string; icon: string }[] = [

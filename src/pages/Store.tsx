@@ -8,16 +8,13 @@ import {
   FaTrash,
   FaTimes,
   FaSearch,
-  FaFilter,
   FaStar,
   FaWhatsapp,
-  FaCheck,
   FaBox,
-  FaArrowRight,
-  FaTag
+  FaArrowRight
 } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
-import type { Product, ProductCategory, CartItem, OrderItem } from '../lib/supabase';
+import type { Product, ProductCategory, OrderItem } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import logoImage from '../assets/spinergy_logo.png';
 
@@ -37,16 +34,6 @@ const getGoogleDriveImageUrl = (url: string): string => {
     return `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1000`;
   }
   return url;
-};
-
-// Generate session ID for guest users
-const getSessionId = (): string => {
-  let sessionId = localStorage.getItem('cart_session_id');
-  if (!sessionId) {
-    sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('cart_session_id', sessionId);
-  }
-  return sessionId;
 };
 
 const Store = () => {
