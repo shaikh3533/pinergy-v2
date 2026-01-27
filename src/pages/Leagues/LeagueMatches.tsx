@@ -8,8 +8,7 @@ import {
   FaCheck,
   FaEdit,
   FaTimes,
-  FaArrowLeft,
-  FaPlus
+  FaArrowLeft
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League, LeagueMatch, LeagueMatchSet, User } from '../../lib/supabase';

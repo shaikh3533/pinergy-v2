@@ -11,11 +11,7 @@ import {
   FaPlay,
   FaTimes,
   FaImage,
-  FaVideo,
-  FaWhatsapp,
-  FaEnvelope,
-  FaPhone,
-  FaCheck
+  FaWhatsapp
 } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import type { Coach, CoachMedia, CoachingSession } from '../lib/supabase';
@@ -25,7 +21,6 @@ const Coaches = () => {
   const [coachMedia, setCoachMedia] = useState<Record<string, CoachMedia[]>>({});
   const [coachSessions, setCoachSessions] = useState<Record<string, CoachingSession[]>>({});
   const [loading, setLoading] = useState(true);
-  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
   const [mediaModal, setMediaModal] = useState<CoachMedia | null>(null);
 
   useEffect(() => {

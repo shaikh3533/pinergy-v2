@@ -50,12 +50,12 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuthStore();
 
   const currentPath = location.pathname;
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
     navigate('/');
   };
 

@@ -7,8 +7,7 @@ import {
   FaUsers, 
   FaTableTennis,
   FaSearch,
-  FaChevronRight,
-  FaFilter
+  FaChevronRight
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League } from '../../lib/supabase';
@@ -37,30 +36,6 @@ const LeaguesList = () => {
       setLeagues(data || []);
     }
     setLoading(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'bg-gray-600 text-gray-200';
-      case 'registration': return 'bg-blue-600 text-white';
-      case 'round_robin': return 'bg-yellow-600 text-white';
-      case 'knockouts': return 'bg-orange-600 text-white';
-      case 'completed': return 'bg-green-600 text-white';
-      case 'cancelled': return 'bg-red-600 text-white';
-      default: return 'bg-gray-600 text-gray-200';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'Upcoming';
-      case 'registration': return 'Registration Open';
-      case 'round_robin': return 'In Progress';
-      case 'knockouts': return 'Knockouts';
-      case 'completed': return 'Completed';
-      case 'cancelled': return 'Cancelled';
-      default: return status;
-    }
   };
 
   // Filter leagues

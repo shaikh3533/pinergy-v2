@@ -11,7 +11,6 @@ import {
   FaExternalLinkAlt,
   FaTimes,
   FaCheck,
-  FaCrop,
   FaLink,
   FaUpload,
   FaYoutube

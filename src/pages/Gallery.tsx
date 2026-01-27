@@ -417,12 +417,10 @@ const GalleryCard = ({
   item,
   index,
   onClick,
-  featured = false,
 }: {
   item: GalleryItem;
   index: number;
   onClick: () => void;
-  featured?: boolean;
 }) => {
   return (
     <motion.div

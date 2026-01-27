@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { Ad, League } from '../../lib/supabase';
 import AdminLayout from '../../components/Admin/AdminLayout';

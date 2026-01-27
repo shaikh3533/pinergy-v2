@@ -17,8 +17,7 @@ import {
   FaTrophy,
   FaChartLine,
   FaCog,
-  FaSignOutAlt,
-  FaUser
+  FaSignOutAlt
 } from 'react-icons/fa';
 import logoImage from '../../assets/primary white variant logo.jpeg';
 

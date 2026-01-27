@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { 
   FaTrophy, 
@@ -9,7 +8,6 @@ import {
   FaTrash,
   FaPlay,
   FaCheck,
-  FaSearch,
   FaChevronRight,
   FaTableTennis,
   FaEdit

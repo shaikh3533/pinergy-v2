@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import {
   FaPlus,
@@ -12,9 +11,7 @@ import {
   FaSave,
   FaTimes,
   FaUser,
-  FaUsers,
-  FaClock,
-  FaCheck
+  FaUsers
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { Coach, CoachMedia, CoachingSession, SessionType, DayType, SkillLevel } from '../../lib/supabase';

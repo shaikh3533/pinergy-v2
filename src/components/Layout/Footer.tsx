@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom';
 import { 
   FaInstagram, 
   FaFacebook, 
-  FaTiktok, 
-  FaYoutube,
+  FaTiktok,
   FaWhatsapp,
   FaEnvelope, 
   FaPhone, 

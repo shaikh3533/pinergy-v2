@@ -25,7 +25,7 @@ import {
 import type { TimeSlot } from '../../utils/timeSlots';
 import { calculateBookingPrice, fetchPricingRules, calculateBookingPriceSync } from '../../utils/pricingCalculator';
 import { sendWhatsAppNotification } from '../../utils/whatsappNotification';
-import { sendCustomerConfirmationEmail, sendAdminNotificationEmail } from '../../utils/emailNotification';
+import { sendCustomerConfirmationEmail } from '../../utils/emailNotification';
 
 interface SelectedSlot {
   date: string;

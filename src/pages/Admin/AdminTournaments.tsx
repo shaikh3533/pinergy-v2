@@ -161,7 +161,7 @@ const AdminTournaments = () => {
       return;
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('leagues')
       .insert({
         ...formData,

@@ -11,9 +11,9 @@ import {
   FaMinus
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
-import type { League, LeaguePlayer, LeagueMatch } from '../../lib/supabase';
+import type { League, LeaguePlayer } from '../../lib/supabase';
 
-interface StandingPlayer extends LeaguePlayer {
+interface StandingPlayer extends Omit<LeaguePlayer, 'player'> {
   player: { id: string; name: string; level: string };
   matches_played: number;
   head_to_head: { [opponentId: string]: { wins: number; losses: number } };
@@ -23,7 +23,6 @@ const LeagueStandings = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [league, setLeague] = useState<League | null>(null);
   const [standings, setStandings] = useState<StandingPlayer[]>([]);
-  const [matches, setMatches] = useState<LeagueMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTiebreakInfo, setShowTiebreakInfo] = useState(false);
 
