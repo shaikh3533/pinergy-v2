@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { FaEdit, FaTimes, FaSave, FaTrophy } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
-import type { Booking, Match, LeagueMatch, LeaguePlayer } from '../lib/supabase';
+import type { Booking, Match, LeagueMatch } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { formatDate } from '../utils/dateUtils';
 import { getLevelBadgeColor } from '../utils/ratingSystem';
