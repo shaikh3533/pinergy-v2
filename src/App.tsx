@@ -38,6 +38,7 @@ import AdminAdsPage from './pages/Admin/AdminAdsPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 import AdminCoaches from './pages/Admin/AdminCoaches';
 import AdminStore from './pages/Admin/AdminStore';
+import AdminReceipt from './pages/Admin/AdminReceipt';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -190,6 +191,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminStore />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/receipt"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminReceipt />
               </ProtectedRoute>
             }
           />

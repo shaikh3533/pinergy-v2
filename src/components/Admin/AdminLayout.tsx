@@ -15,7 +15,8 @@ import {
   FaSignOutAlt,
   FaHome,
   FaChevronLeft,
-  FaShoppingCart
+  FaShoppingCart,
+  FaFileInvoiceDollar
 } from 'react-icons/fa';
 import { useAuthStore } from '../../store/authStore';
 import logoImage from '../../assets/spinergy_logo.png';
@@ -41,6 +42,7 @@ const navItems: NavItem[] = [
   { id: 'add-booking', label: 'Add Booking', icon: <FaPlus />, path: '/admin/add-booking', color: 'text-emerald-400' },
   { id: 'tournaments', label: 'Tournaments', icon: <FaTrophy />, path: '/admin/tournaments', color: 'text-yellow-400' },
   { id: 'store', label: 'Store', icon: <FaShoppingCart />, path: '/admin/store', color: 'text-lime-400' },
+  { id: 'receipt', label: 'Receipts', icon: <FaFileInvoiceDollar />, path: '/admin/receipt', color: 'text-indigo-400' },
   { id: 'coaches', label: 'Coaches', icon: <FaUsers />, path: '/admin/coaches', color: 'text-cyan-400' },
   { id: 'gallery', label: 'Gallery', icon: <FaImages />, path: '/admin/gallery', color: 'text-pink-400' },
   { id: 'ads', label: 'Ads & Events', icon: <FaBullhorn />, path: '/admin/ads', color: 'text-orange-400' },
