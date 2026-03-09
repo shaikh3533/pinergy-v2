@@ -25,6 +25,7 @@ const LeagueStandings = () => {
   const [standings, setStandings] = useState<StandingPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTiebreakInfo, setShowTiebreakInfo] = useState(false);
+  const [isFinalStandings, setIsFinalStandings] = useState(false);
 
   useEffect(() => {
     if (leagueId) {
@@ -35,7 +36,6 @@ const LeagueStandings = () => {
   const fetchData = async () => {
     setLoading(true);
     
-    // Fetch league
     const { data: leagueData } = await supabase
       .from('leagues')
       .select('*')
@@ -44,74 +44,120 @@ const LeagueStandings = () => {
     
     if (leagueData) setLeague(leagueData);
 
-    // Fetch players
     const { data: playersData } = await supabase
       .from('league_players')
       .select('*, player:player_id(id, name, level)')
       .eq('league_id', leagueId)
       .eq('status', 'active');
 
-    // Fetch completed matches for head-to-head calculation
     const { data: matchesData } = await supabase
       .from('league_matches')
       .select('*')
       .eq('league_id', leagueId)
       .eq('status', 'completed');
 
-    // Calculate standings with tie-breakers
-    if (playersData) {
-      const standingsWithH2H = playersData.map(player => {
-        // Calculate head-to-head records
-        const h2h: { [opponentId: string]: { wins: number; losses: number } } = {};
-        let matchesPlayed = 0;
+    if (!playersData) {
+      setLoading(false);
+      return;
+    }
 
-        (matchesData || []).forEach(match => {
-          if (match.player1_id === player.player_id || match.player2_id === player.player_id) {
-            matchesPlayed++;
-            const opponentId = match.player1_id === player.player_id ? match.player2_id : match.player1_id;
-            
-            if (!h2h[opponentId]) {
-              h2h[opponentId] = { wins: 0, losses: 0 };
-            }
+    const playerMap = new Map(playersData.map(p => [p.player_id, p]));
 
-            if (match.winner_id === player.player_id) {
-              h2h[opponentId].wins++;
-            } else {
-              h2h[opponentId].losses++;
-            }
+    // Check if we have knockout results for final standings
+    const finalMatch = (matchesData || []).find((m: any) => m.match_type === 'final' && m.winner_id);
+    const thirdPlaceMatch = (matchesData || []).find((m: any) => m.match_type === 'third_place' && m.winner_id);
+
+    if (finalMatch && leagueData && ['knockouts', 'completed'].includes(leagueData.status)) {
+      // Build final standings from knockout results: 1st, 2nd, 3rd, 4th, then rest by round robin
+      const finalWinnerId = finalMatch.winner_id;
+      const finalLoserId = finalMatch.player1_id === finalWinnerId ? finalMatch.player2_id : finalMatch.player1_id;
+      const thirdWinnerId = thirdPlaceMatch?.winner_id;
+      const thirdLoserId = thirdPlaceMatch
+        ? (thirdPlaceMatch.player1_id === thirdWinnerId ? thirdPlaceMatch.player2_id : thirdPlaceMatch.player1_id)
+        : null;
+
+      const top4Ids = [finalWinnerId, finalLoserId, thirdWinnerId, thirdLoserId].filter(Boolean);
+      const usedIds = new Set(top4Ids);
+      const restPlayers = playersData.filter(p => !usedIds.has(p.player_id));
+
+      // Round robin sort for rest
+      restPlayers.forEach(p => {
+        const h2h: { [key: string]: { wins: number; losses: number } } = {};
+        (matchesData || []).forEach((m: any) => {
+          if ((m.player1_id === p.player_id || m.player2_id === p.player_id) && !top4Ids.includes(m.player1_id) && !top4Ids.includes(m.player2_id)) {
+            const opp = m.player1_id === p.player_id ? m.player2_id : m.player1_id;
+            if (!h2h[opp]) h2h[opp] = { wins: 0, losses: 0 };
+            if (m.winner_id === p.player_id) h2h[opp].wins++;
+            else h2h[opp].losses++;
           }
         });
-
-        return {
-          ...player,
-          matches_played: matchesPlayed,
-          head_to_head: h2h,
-        } as StandingPlayer;
+        (p as any).head_to_head = h2h;
       });
-
-      // Sort standings with tie-breaking rules
-      standingsWithH2H.sort((a, b) => {
-        // 1. Total Wins (descending)
+      restPlayers.sort((a: any, b: any) => {
         if (b.wins !== a.wins) return b.wins - a.wins;
-        
-        // 2. Point Difference / Run Rate (descending)
         if (b.point_difference !== a.point_difference) return b.point_difference - a.point_difference;
-        
-        // 3. Head-to-Head Result
-        const aH2H = a.head_to_head[b.player.id];
-        const bH2H = b.head_to_head[a.player.id];
-        if (aH2H && bH2H) {
-          if (aH2H.wins !== bH2H.wins) return bH2H.wins - aH2H.wins;
-        }
-        
-        // 4. Lowest Points Conceded (ascending)
+        const aH2H = a.head_to_head?.[b.player_id];
+        const bH2H = b.head_to_head?.[a.player_id];
+        if (aH2H && bH2H && aH2H.wins !== bH2H.wins) return bH2H.wins - aH2H.wins;
         if (a.points_against !== b.points_against) return a.points_against - b.points_against;
-        
-        // 5. Highest Points Scored (descending)
         return b.points_for - a.points_for;
       });
 
+      const ordered: StandingPlayer[] = [];
+      for (const id of top4Ids) {
+        const p = playerMap.get(id);
+        if (p) {
+          const h2h: { [key: string]: { wins: number; losses: number } } = {};
+          let matchesPlayed = 0;
+          (matchesData || []).forEach((m: any) => {
+            if (m.player1_id === p.player_id || m.player2_id === p.player_id) {
+              matchesPlayed++;
+              const opp = m.player1_id === p.player_id ? m.player2_id : m.player1_id;
+              if (!h2h[opp]) h2h[opp] = { wins: 0, losses: 0 };
+              if (m.winner_id === p.player_id) h2h[opp].wins++;
+              else h2h[opp].losses++;
+            }
+          });
+          ordered.push({ ...p, matches_played: matchesPlayed, head_to_head: h2h } as StandingPlayer);
+        }
+      }
+      restPlayers.forEach(p => {
+        let matchesPlayed = 0;
+        (matchesData || []).forEach((m: any) => {
+          if (m.player1_id === p.player_id || m.player2_id === p.player_id) matchesPlayed++;
+        });
+        ordered.push({ ...p, matches_played: matchesPlayed, head_to_head: (p as any).head_to_head || {} } as StandingPlayer);
+      });
+      setStandings(ordered);
+      setIsFinalStandings(true);
+    } else {
+      // Round robin standings (or before knockouts complete)
+      const standingsWithH2H = playersData.map(player => {
+        const h2h: { [opponentId: string]: { wins: number; losses: number } } = {};
+        let matchesPlayed = 0;
+        (matchesData || []).forEach((match: any) => {
+          if (match.player1_id === player.player_id || match.player2_id === player.player_id) {
+            matchesPlayed++;
+            const opponentId = match.player1_id === player.player_id ? match.player2_id : match.player1_id;
+            if (!h2h[opponentId]) h2h[opponentId] = { wins: 0, losses: 0 };
+            if (match.winner_id === player.player_id) h2h[opponentId].wins++;
+            else h2h[opponentId].losses++;
+          }
+        });
+        return { ...player, matches_played: matchesPlayed, head_to_head: h2h } as StandingPlayer;
+      });
+
+      standingsWithH2H.sort((a, b) => {
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        if (b.point_difference !== a.point_difference) return b.point_difference - a.point_difference;
+        const aH2H = a.head_to_head[b.player.id];
+        const bH2H = b.head_to_head[a.player.id];
+        if (aH2H && bH2H && aH2H.wins !== bH2H.wins) return bH2H.wins - aH2H.wins;
+        if (a.points_against !== b.points_against) return a.points_against - b.points_against;
+        return b.points_for - a.points_for;
+      });
       setStandings(standingsWithH2H);
+      setIsFinalStandings(false);
     }
 
     setLoading(false);
@@ -158,7 +204,7 @@ const LeagueStandings = () => {
               </Link>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <FaTrophy className="text-yellow-500" />
-                {league?.name} - Standings
+                {league?.name} - {isFinalStandings ? 'Final Standings' : 'Standings'}
               </h1>
             </div>
             <button
@@ -187,16 +233,22 @@ const LeagueStandings = () => {
             </motion.div>
           )}
 
-          {/* Qualification Info */}
+          {/* Qualification / Final Info */}
           {league && (
             <div className="mb-6 p-4 bg-gray-800 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">
-                  Top <strong className="text-white">{league.top_qualifiers}</strong> players qualify for knockouts
+                  {isFinalStandings ? (
+                    <>Final results from knockout stage (1st–4th) + round robin (5th+)</>
+                  ) : (
+                    <>Top <strong className="text-white">{league.top_qualifiers}</strong> players qualify for knockouts</>
+                  )}
                 </span>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="px-2 py-1 bg-green-600/30 text-green-400 rounded">Qualified Zone</span>
-                </div>
+                {!isFinalStandings && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="px-2 py-1 bg-green-600/30 text-green-400 rounded">Qualified Zone</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

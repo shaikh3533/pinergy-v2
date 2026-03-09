@@ -267,7 +267,7 @@ const LeagueMatches = () => {
                 <p className="text-gray-400">
                   {activeTab === 'round_robin' 
                     ? 'Round robin matches will appear here once generated'
-                    : 'Knockout matches will appear after round robin completes'}
+                    : 'Knockout matches appear when admin generates the knockout stage.'}
                 </p>
               </div>
             ) : (

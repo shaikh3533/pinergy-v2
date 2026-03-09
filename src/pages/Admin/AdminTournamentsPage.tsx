@@ -10,7 +10,12 @@ import {
   FaCheck,
   FaChevronRight,
   FaTableTennis,
-  FaEdit
+  FaEdit,
+  FaUndo,
+  FaInfoCircle,
+  FaCopy,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { League, LeaguePlayer, User, LeagueStatus } from '../../lib/supabase';
@@ -165,6 +170,13 @@ const AdminTournamentsPage = () => {
   const [playerSearchResults, setPlayerSearchResults] = useState<User[]>([]);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
+
+  // Quick Add Results (bulk SQL generator)
+  const [showQuickAddResults, setShowQuickAddResults] = useState(false);
+  const [quickAddInput, setQuickAddInput] = useState('');
+  const [generatedSql, setGeneratedSql] = useState('');
+  const [quickAddError, setQuickAddError] = useState('');
+  const [showQuickAddFormatInfo, setShowQuickAddFormatInfo] = useState(false);
 
   useEffect(() => {
     fetchLeagues();
@@ -353,9 +365,28 @@ const AdminTournamentsPage = () => {
       .eq('id', selectedLeague.id);
 
     if (!error) {
-      toast.success(`Status: ${status}`);
+      toast.success(`Status updated to ${status}`);
       setSelectedLeague({ ...selectedLeague, status });
       fetchLeagues();
+    }
+  };
+
+  // Revert status to a previous stage (e.g. undo "Complete" or go back to edit)
+  const handleRevertStatus = async (newStatus: LeagueStatus, label: string) => {
+    if (!selectedLeague) return;
+    if (!confirm(`Set tournament back to "${label}"? You can edit and move forward again when ready.`)) return;
+
+    const { error } = await supabase
+      .from('leagues')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', selectedLeague.id);
+
+    if (!error) {
+      toast.success(`Re-opened: back to ${label}`);
+      setSelectedLeague({ ...selectedLeague, status: newStatus });
+      fetchLeagues();
+    } else {
+      toast.error('Failed to update status');
     }
   };
 
@@ -374,13 +405,14 @@ const AdminTournamentsPage = () => {
 
   const handleGenerateRoundRobinMatches = async () => {
     if (!selectedLeague || leaguePlayers.length < 2) {
-      toast.error('Need at least 2 players');
+      toast.error('Need at least 2 players to start');
       return;
     }
 
     const players = leaguePlayers.map(lp => lp.player_id);
     const matches: any[] = [];
     let matchNumber = 1;
+    const setsToWin = Math.ceil((selectedLeague.round_robin_sets || selectedLeague.group_stage_sets || 1) / 2);
 
     for (let i = 0; i < players.length; i++) {
       for (let j = i + 1; j < players.length; j++) {
@@ -390,7 +422,8 @@ const AdminTournamentsPage = () => {
           player2_id: players[j],
           match_type: 'round_robin',
           match_number: matchNumber++,
-          sets_to_win: Math.ceil(selectedLeague.round_robin_sets / 2),
+          round_number: 1,
+          sets_to_win: setsToWin,
           status: 'scheduled',
         });
       }
@@ -401,8 +434,385 @@ const AdminTournamentsPage = () => {
     if (error) {
       toast.error('Failed to generate matches');
     } else {
-      toast.success(`Generated ${matches.length} matches!`);
+      toast.success(`Generated ${matches.length} matches! You can proceed to knockouts anytime from the status button.`);
       handleUpdateLeagueStatus('round_robin');
+    }
+  };
+
+  // Get current standings (refetches league_players so stats are up to date)
+  const getStandingsForKnockouts = async (): Promise<LeaguePlayer[]> => {
+    if (!selectedLeague) return [];
+
+    const { data: freshPlayers } = await supabase
+      .from('league_players')
+      .select('*, player:player_id(*)')
+      .eq('league_id', selectedLeague.id)
+      .eq('status', 'active')
+      .order('seed_number');
+
+    if (!freshPlayers || freshPlayers.length === 0) return [];
+
+    const { data: matchesData } = await supabase
+      .from('league_matches')
+      .select('*')
+      .eq('league_id', selectedLeague.id)
+      .eq('status', 'completed');
+
+    const playersWithH2H = freshPlayers.map((lp: any) => {
+      const h2h: { [key: string]: { wins: number; losses: number } } = {};
+      (matchesData || []).forEach((match: any) => {
+        if (match.player1_id === lp.player_id || match.player2_id === lp.player_id) {
+          const opponentId = match.player1_id === lp.player_id ? match.player2_id : match.player1_id;
+          if (!h2h[opponentId]) h2h[opponentId] = { wins: 0, losses: 0 };
+          if (match.winner_id === lp.player_id) h2h[opponentId].wins++;
+          else h2h[opponentId].losses++;
+        }
+      });
+      return { ...lp, head_to_head: h2h };
+    });
+
+    playersWithH2H.sort((a: any, b: any) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.point_difference !== a.point_difference) return b.point_difference - a.point_difference;
+      const aH2H = a.head_to_head[b.player_id];
+      const bH2H = b.head_to_head[a.player_id];
+      if (aH2H && bH2H && aH2H.wins !== bH2H.wins) return bH2H.wins - aH2H.wins;
+      if (a.points_against !== b.points_against) return a.points_against - b.points_against;
+      return b.points_for - a.points_for;
+    });
+
+    return playersWithH2H;
+  };
+
+  // Build knockout match rows from seeded player ids (does not insert)
+  const buildKnockoutMatches = (seeded: string[]) => {
+    if (!selectedLeague) return [];
+    const topN = seeded.length;
+    const semifinalSets = selectedLeague.semifinal_sets ?? 3;
+    const finalSets = selectedLeague.final_sets ?? 5;
+    const setsToWinSF = Math.ceil(semifinalSets / 2);
+    const setsToWinF = Math.ceil(finalSets / 2);
+    const knockoutMatches: any[] = [];
+
+    if (topN === 2) {
+      knockoutMatches.push({
+        league_id: selectedLeague.id,
+        player1_id: seeded[0],
+        player2_id: seeded[1],
+        match_type: 'final',
+        match_number: 1,
+        round_number: 2,
+        sets_to_win: setsToWinF,
+        status: 'scheduled',
+      });
+    } else if (topN >= 4) {
+      knockoutMatches.push(
+        {
+          league_id: selectedLeague.id,
+          player1_id: seeded[0],
+          player2_id: seeded[3],
+          match_type: 'semifinal',
+          match_number: 1,
+          round_number: 2,
+          sets_to_win: setsToWinSF,
+          status: 'scheduled',
+        },
+        {
+          league_id: selectedLeague.id,
+          player1_id: seeded[1],
+          player2_id: seeded[2],
+          match_type: 'semifinal',
+          match_number: 2,
+          round_number: 2,
+          sets_to_win: setsToWinSF,
+          status: 'scheduled',
+        }
+      );
+    }
+    return knockoutMatches;
+  };
+
+  // Generate knockout stage matches from current standings (always uses fresh data from DB)
+  const handleGenerateKnockoutMatches = async () => {
+    if (!selectedLeague) return;
+
+    const standings = await getStandingsForKnockouts();
+    const topN = selectedLeague.top_qualifiers || 4;
+
+    if (standings.length < topN) {
+      toast.error(`Need at least ${topN} players for knockouts (current: ${standings.length})`);
+      return;
+    }
+
+    const seeded = standings.slice(0, topN).map(lp => lp.player_id);
+    const knockoutMatches = buildKnockoutMatches(seeded);
+
+    if (knockoutMatches.length === 0) {
+      toast.error('Top qualifiers must be 2 or 4 (or 8 with quarterfinals later)');
+      return;
+    }
+
+    const { error } = await supabase.from('league_matches').insert(knockoutMatches);
+    if (error) {
+      toast.error('Failed to generate knockout matches');
+      return;
+    }
+    toast.success(`Generated ${knockoutMatches.length} knockout match(es) from current standings.`);
+    setLeaguePlayers(standings);
+    handleUpdateLeagueStatus('knockouts');
+  };
+
+  // Regenerate knockouts: only delete SEMIFINALS and recreate (preserves final/third place results)
+  const handleRegenerateKnockouts = async () => {
+    if (!selectedLeague) return;
+    if (!confirm('This will replace semifinal matches only (final and 3rd place results are kept). Continue?')) return;
+
+    const { data: existingSemis } = await supabase
+      .from('league_matches')
+      .select('id')
+      .eq('league_id', selectedLeague.id)
+      .eq('match_type', 'semifinal');
+
+    if (existingSemis && existingSemis.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('league_matches')
+        .delete()
+        .eq('league_id', selectedLeague.id)
+        .eq('match_type', 'semifinal');
+
+      if (deleteError) {
+        toast.error('Failed to remove existing semifinals');
+        return;
+      }
+    }
+
+    const standings = await getStandingsForKnockouts();
+    const topN = selectedLeague.top_qualifiers || 4;
+
+    if (standings.length < topN) {
+      toast.error(`Need at least ${topN} players (current: ${standings.length})`);
+      return;
+    }
+
+    const seeded = standings.slice(0, topN).map(lp => lp.player_id);
+    const knockoutMatches = buildKnockoutMatches(seeded);
+
+    if (knockoutMatches.length === 0) {
+      toast.error('Top qualifiers must be 2 or 4');
+      return;
+    }
+
+    const { error } = await supabase.from('league_matches').insert(knockoutMatches);
+    if (error) {
+      toast.error('Failed to generate knockout matches');
+      return;
+    }
+    toast.success('Knockouts regenerated from current standings.');
+    setLeaguePlayers(standings);
+  };
+
+  // Create Final and Third Place matches once both semifinals are completed
+  const handleGenerateFinalAndThirdPlace = async () => {
+    if (!selectedLeague) return;
+
+    const { data: existingFinal } = await supabase
+      .from('league_matches')
+      .select('id')
+      .eq('league_id', selectedLeague.id)
+      .eq('match_type', 'final')
+      .maybeSingle();
+
+    if (existingFinal) {
+      toast.error('Final match already exists. Delete it first if you need to regenerate.');
+      return;
+    }
+
+    const { data: semifinals } = await supabase
+      .from('league_matches')
+      .select('id, player1_id, player2_id, winner_id')
+      .eq('league_id', selectedLeague.id)
+      .eq('match_type', 'semifinal')
+      .eq('status', 'completed');
+
+    if (!semifinals || semifinals.length < 2) {
+      toast.error('Complete both semifinals first');
+      return;
+    }
+
+    const [sf1, sf2] = semifinals;
+    const winner1 = sf1.winner_id;
+    const winner2 = sf2.winner_id;
+    const loser1 = winner1 === sf1.player1_id ? sf1.player2_id : sf1.player1_id;
+    const loser2 = winner2 === sf2.player1_id ? sf2.player2_id : sf2.player1_id;
+
+    if (!winner1 || !winner2) {
+      toast.error('Semifinals must have a winner set');
+      return;
+    }
+
+    const finalSets = selectedLeague.final_sets ?? 5;
+    const setsToWin = Math.ceil(finalSets / 2);
+    const inserts: any[] = [
+      {
+        league_id: selectedLeague.id,
+        player1_id: winner1,
+        player2_id: winner2,
+        match_type: 'final',
+        match_number: 1,
+        round_number: 3,
+        sets_to_win: setsToWin,
+        status: 'scheduled',
+      },
+    ];
+
+    if (selectedLeague.has_third_place_match) {
+      const { data: existingThird } = await supabase
+        .from('league_matches')
+        .select('id')
+        .eq('league_id', selectedLeague.id)
+        .eq('match_type', 'third_place')
+        .maybeSingle();
+      if (!existingThird) {
+        inserts.push({
+          league_id: selectedLeague.id,
+          player1_id: loser1,
+          player2_id: loser2,
+          match_type: 'third_place',
+          match_number: 2,
+          round_number: 3,
+          sets_to_win: setsToWin,
+          status: 'scheduled',
+        });
+      }
+    }
+
+    if (inserts.length === 0) {
+      toast.error('Final and Third Place already exist.');
+      return;
+    }
+
+    const { error } = await supabase.from('league_matches').insert(inserts);
+    if (error) {
+      toast.error('Failed to create final/third place');
+      return;
+    }
+    toast.success(`Created Final and ${selectedLeague.has_third_place_match ? 'Third Place ' : ''}match(es).`);
+  };
+
+  // Quick Add Results: parse input and generate SQL for Supabase SQL Editor
+  const handleGenerateQuickAddSql = async () => {
+    if (!selectedLeague || !quickAddInput.trim()) {
+      setQuickAddError('Select a league and enter results.');
+      return;
+    }
+    setQuickAddError('');
+    setGeneratedSql('');
+
+    const lines = quickAddInput.trim().split('\n').filter(Boolean);
+    if (lines.length === 0) {
+      setQuickAddError('Enter at least one match result.');
+      return;
+    }
+
+    const { data: matches } = await supabase
+      .from('league_matches')
+      .select('id, match_number, player1_id, player2_id, sets_to_win')
+      .eq('league_id', selectedLeague.id)
+      .order('match_number');
+
+    const matchByNumber = new Map((matches || []).map((m: any) => [m.match_number, m]));
+    const leagueId = selectedLeague.id;
+    const now = new Date().toISOString();
+
+    const sqlParts: string[] = [];
+    const statsCalls: string[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const parts = line.split(/[|,\t]+/).map(p => p.trim()).filter(Boolean);
+      if (parts.length < 2) {
+        setQuickAddError(`Line ${i + 1}: Need match_number and at least one set score (e.g. 11-9).`);
+        return;
+      }
+
+      const matchNum = parseInt(parts[0], 10);
+      if (isNaN(matchNum)) {
+        setQuickAddError(`Line ${i + 1}: First value must be match number.`);
+        return;
+      }
+
+      const match = matchByNumber.get(matchNum);
+      if (!match) {
+        setQuickAddError(`Line ${i + 1}: Match #${matchNum} not found in this league.`);
+        return;
+      }
+
+      const setScores: { p1: number; p2: number }[] = [];
+      for (let j = 1; j < parts.length; j++) {
+        const setPart = parts[j];
+        const dash = setPart.indexOf('-');
+        if (dash === -1) {
+          setQuickAddError(`Line ${i + 1}: Set "${setPart}" must be in format 11-9.`);
+          return;
+        }
+        const p1 = parseInt(setPart.slice(0, dash), 10);
+        const p2 = parseInt(setPart.slice(dash + 1), 10);
+        if (isNaN(p1) || isNaN(p2)) {
+          setQuickAddError(`Line ${i + 1}: Invalid set score "${setPart}".`);
+          return;
+        }
+        setScores.push({ p1, p2 });
+      }
+
+      let p1Sets = 0, p2Sets = 0, p1Points = 0, p2Points = 0;
+      for (const s of setScores) {
+        p1Points += s.p1;
+        p2Points += s.p2;
+        if (s.p1 > s.p2) p1Sets++;
+        else if (s.p2 > s.p1) p2Sets++;
+      }
+
+      const winnerId = p1Sets >= match.sets_to_win ? match.player1_id
+        : p2Sets >= match.sets_to_win ? match.player2_id : null;
+      const loserId = winnerId === match.player1_id ? match.player2_id
+        : winnerId === match.player2_id ? match.player1_id : null;
+
+      sqlParts.push(`-- Match #${matchNum}`);
+      sqlParts.push(`UPDATE league_matches SET player1_sets_won = ${p1Sets}, player2_sets_won = ${p2Sets}, winner_id = ${winnerId ? `'${winnerId}'` : 'NULL'}, status = 'completed', played_at = '${now}', updated_at = '${now}' WHERE id = '${match.id}';`);
+      sqlParts.push(`DELETE FROM league_match_sets WHERE match_id = '${match.id}';`);
+
+      const setInserts = setScores.map((s, idx) =>
+        `INSERT INTO league_match_sets (match_id, set_number, player1_score, player2_score, winner_id) VALUES ('${match.id}', ${idx + 1}, ${s.p1}, ${s.p2}, ${s.p1 > s.p2 ? `'${match.player1_id}'` : s.p2 > s.p1 ? `'${match.player2_id}'` : 'NULL'});`
+      );
+      sqlParts.push(...setInserts);
+
+      if (winnerId && loserId) {
+        const wp = winnerId === match.player1_id ? p1Points : p2Points;
+        const lp = winnerId === match.player1_id ? p2Points : p1Points;
+        statsCalls.push(`SELECT update_league_player_match_stats('${leagueId}', '${winnerId}', true, ${wp}, ${lp});`);
+        statsCalls.push(`SELECT update_league_player_match_stats('${leagueId}', '${loserId}', false, ${lp}, ${wp});`);
+      }
+    }
+
+    const fullSql = [
+      '-- Quick Add Results: Copy and run in Supabase SQL Editor',
+      `-- League: ${selectedLeague.name} (${leagueId})`,
+      '-- Generated at ' + now,
+      '',
+      ...sqlParts,
+      '',
+      '-- Update league player stats',
+      ...statsCalls,
+    ].join('\n');
+
+    setGeneratedSql(fullSql);
+    toast.success('SQL generated. Copy and run in Supabase SQL Editor.');
+  };
+
+  const handleCopyGeneratedSql = () => {
+    if (generatedSql) {
+      navigator.clipboard.writeText(generatedSql);
+      toast.success('SQL copied to clipboard');
     }
   };
 
@@ -604,6 +1014,7 @@ const AdminTournamentsPage = () => {
             {/* Max Players */}
             <div>
               <label className="label">Maximum Players</label>
+              <p className="text-xs text-gray-500 mb-2">League can start with 2 or more players (e.g. 8 minimum recommended).</p>
               <div className="flex gap-2 flex-wrap">
                 {[4, 8, 12, 16, 24, 32].map((num) => (
                   <button
@@ -806,7 +1217,8 @@ const AdminTournamentsPage = () => {
             </div>
 
             {/* Status Actions */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2 flex-wrap">
               {selectedLeague.status === 'upcoming' && (
                 <button
                   onClick={() => handleUpdateLeagueStatus('registration')}
@@ -825,19 +1237,88 @@ const AdminTournamentsPage = () => {
               )}
               {selectedLeague.status === 'round_robin' && (
                 <button
-                  onClick={() => handleUpdateLeagueStatus('knockouts')}
+                  onClick={handleGenerateKnockoutMatches}
                   className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg flex items-center gap-2"
+                  title="Generate knockout matches from current standings (round robin need not be fully completed)"
                 >
-                  <FaTrophy /> Start Knockouts
+                  <FaTrophy /> Generate & Start Knockouts
                 </button>
               )}
               {selectedLeague.status === 'knockouts' && (
+                <>
+                  <button
+                    onClick={handleRegenerateKnockouts}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center gap-2"
+                    title="Re-seed knockouts from current round robin standings (replaces existing semifinals)"
+                  >
+                    <FaTableTennis /> Regenerate Knockouts
+                  </button>
+                  <button
+                    onClick={handleGenerateFinalAndThirdPlace}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2"
+                    title="Create Final and Third Place after both semifinals are completed"
+                  >
+                    <FaTrophy /> Generate Final & Third Place
+                  </button>
+                  <button
+                    onClick={() => handleUpdateLeagueStatus('completed')}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                  >
+                    <FaCheck /> Complete
+                  </button>
+                </>
+              )}
+              {selectedLeague.status === 'completed' && (
                 <button
-                  onClick={() => handleUpdateLeagueStatus('completed')}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                  onClick={() => handleRevertStatus('knockouts', 'Knockouts')}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg flex items-center gap-2 border border-gray-500"
+                  title="Re-open tournament to fix or update knockout stage"
                 >
-                  <FaCheck /> Complete
+                  <FaUndo /> Re-open (back to Knockouts)
                 </button>
+              )}
+              </div>
+              {/* Revert / Back buttons - allow admin to undo status and edit again */}
+              <div className="flex gap-2 flex-wrap items-center pt-2 border-t border-gray-700 mt-2">
+                <span className="text-xs text-gray-500 mr-2">Revert status:</span>
+                {selectedLeague.status === 'knockouts' && (
+                  <button
+                    onClick={() => handleRevertStatus('round_robin', 'Round Robin')}
+                    className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg flex items-center gap-1.5"
+                  >
+                    <FaUndo /> Back to Round Robin
+                  </button>
+                )}
+                {selectedLeague.status === 'round_robin' && (
+                  <button
+                    onClick={() => handleRevertStatus('registration', 'Registration')}
+                    className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg flex items-center gap-1.5"
+                  >
+                    <FaUndo /> Back to Registration
+                  </button>
+                )}
+                {selectedLeague.status === 'registration' && (
+                  <button
+                    onClick={() => handleRevertStatus('upcoming', 'Upcoming')}
+                    className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg flex items-center gap-1.5"
+                  >
+                    <FaUndo /> Back to Upcoming
+                  </button>
+                )}
+                {selectedLeague.status === 'completed' && (
+                  <button
+                    onClick={() => handleRevertStatus('round_robin', 'Round Robin')}
+                    className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg flex items-center gap-1.5"
+                  >
+                    <FaUndo /> Back to Round Robin
+                  </button>
+                )}
+              </div>
+              {selectedLeague.status === 'registration' && leaguePlayers.length >= 2 && (
+                <p className="text-xs text-gray-500">You can start with 2+ players. Proceed to knockouts anytime from round robin.</p>
+              )}
+              {selectedLeague.status === 'round_robin' && (
+                <p className="text-xs text-gray-500">Knockouts are seeded from current standings. You don’t need to complete all round robin matches first.</p>
               )}
             </div>
           </div>
@@ -952,6 +1433,78 @@ const AdminTournamentsPage = () => {
               <FaTrophy className="text-3xl text-green-500 mx-auto mb-2" />
               <div className="text-white font-semibold">Standings</div>
             </a>
+          </div>
+
+          {/* Quick Add Results (optional bulk SQL generator) */}
+          <div className="card">
+            <button
+              onClick={() => setShowQuickAddResults(!showQuickAddResults)}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-2">
+                <FaEdit className="text-primary-blue" />
+                <span className="font-semibold text-white">Quick Add Results</span>
+                <span className="text-xs text-gray-500">(Bulk add scores via SQL)</span>
+              </div>
+              {showQuickAddResults ? <FaChevronUp /> : <FaChevronDown />}
+            </button>
+            {showQuickAddResults && (
+              <div className="mt-4 pt-4 border-t border-gray-700 space-y-4">
+                <div className="flex items-start gap-2">
+                  <button
+                    onClick={() => setShowQuickAddFormatInfo(!showQuickAddFormatInfo)}
+                    className="p-1.5 rounded hover:bg-gray-700 text-primary-blue flex-shrink-0 mt-0.5"
+                    title="Query format help"
+                  >
+                    <FaInfoCircle className="text-lg" />
+                  </button>
+                  <div className="flex-1">
+                    <label className="label text-sm">Paste results (one match per line)</label>
+                    <textarea
+                      value={quickAddInput}
+                      onChange={(e) => { setQuickAddInput(e.target.value); setQuickAddError(''); }}
+                      placeholder={'1|11-9|11-7|11-5\n2|9-11|11-8|11-6|11-4'}
+                      className="input-field font-mono text-sm min-h-[120px]"
+                      rows={6}
+                    />
+                    {showQuickAddFormatInfo && (
+                      <div className="mt-2 p-3 bg-gray-800 rounded-lg text-sm text-gray-300 space-y-2">
+                        <p className="font-semibold text-white">Format: <code className="bg-gray-700 px-1 rounded">match_number|set1|set2|...</code></p>
+                        <p>• One match per line. Use <code className="bg-gray-700 px-1 rounded">|</code> or <code className="bg-gray-700 px-1 rounded">,</code> to separate.</p>
+                        <p>• Set scores: <code className="bg-gray-700 px-1 rounded">player1-player2</code> (e.g. 11-9, 9-11).</p>
+                        <p className="text-gray-400">Example:</p>
+                        <pre className="bg-gray-900 p-2 rounded text-xs overflow-x-auto">1|11-9|11-7|11-5
+2|9-11|11-8|11-6|11-4</pre>
+                        <p className="text-amber-400">Copy the generated SQL and run it in Supabase Dashboard → SQL Editor.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {quickAddError && <p className="text-red-400 text-sm">{quickAddError}</p>}
+                <button
+                  onClick={handleGenerateQuickAddSql}
+                  className="px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg flex items-center gap-2"
+                >
+                  Generate SQL
+                </button>
+                {generatedSql && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-400">Generated SQL (copy and run in Supabase SQL Editor)</span>
+                      <button
+                        onClick={handleCopyGeneratedSql}
+                        className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg flex items-center gap-2 text-sm"
+                      >
+                        <FaCopy /> Copy
+                      </button>
+                    </div>
+                    <pre className="p-3 bg-gray-900 rounded-lg text-xs text-gray-300 overflow-x-auto max-h-64 overflow-y-auto font-mono whitespace-pre-wrap break-words">
+                      {generatedSql}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
