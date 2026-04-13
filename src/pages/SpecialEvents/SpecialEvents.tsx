@@ -9,10 +9,11 @@ import {
   FaChevronRight, 
   FaTableTennis,
   FaTimes,
-  FaCheckCircle
+  FaPlay,
+  FaEdit
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
-import type { DCTournament, DCTeam, User } from '../../lib/supabase';
+import type { DCTournament, DCTeam } from '../../lib/supabase';
 
 interface DCTie {
   id: string;

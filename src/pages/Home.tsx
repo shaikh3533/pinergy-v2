@@ -8,8 +8,7 @@ import {
   FaCheckCircle,
   FaSignal,
   FaListUl,
-  FaChartBar,
-  FaUsers
+  FaChartBar
 } from 'react-icons/fa';
 import logoImage from '../assets/spinergy_logo.png';
 import tibharImage from '../assets/tibhar.png';
@@ -23,8 +22,6 @@ const Home = () => {
   const [latestWinner, setLatestWinner] = useState<{ leagueName: string; winnerName: string; leagueId: string } | null>(null);
   const [activeArenaTab, setActiveArenaTab] = useState<'scoreboard' | 'ledger' | 'standings' | 'analytics'>('scoreboard');
   const [arenaParticipants, setArenaParticipants] = useState<any[]>([]);
-  const [leagueData, setLeagueData] = useState<any>(null);
-  const [dcTournament, setDcTournament] = useState<any>(null);
 
   useEffect(() => {
     const fetchStream = async () => {
@@ -43,8 +40,7 @@ const Home = () => {
            if (mData) setSpotlightMatches(mData);
 
            // 2. Fetch League Meta & Standings
-           const { data: lInfo } = await supabase.from('leagues').select('*').eq('id', event_id).single();
-           setLeagueData(lInfo);
+           await supabase.from('leagues').select('*').eq('id', event_id).single();
 
            const { data: pData } = await supabase
              .from('league_players')
@@ -70,8 +66,7 @@ const Home = () => {
              .eq('tournament_id', event_id);
            if (tData) setArenaParticipants(tData);
 
-           const { data: tournament } = await supabase.from('dc_tournaments').select('*').eq('id', event_id).single();
-           setDcTournament(tournament);
+           await supabase.from('dc_tournaments').select('*').eq('id', event_id).single();
         }
       }
     };
@@ -378,7 +373,7 @@ const Home = () => {
                         >
                            <ArenaStandings 
                               participants={arenaParticipants} 
-                              type={liveStream.event_type} 
+                              type={liveStream.event_type || ''} 
                               matches={spotlightMatches}
                            />
                         </motion.div>
@@ -392,7 +387,7 @@ const Home = () => {
                           exit={{ opacity: 0, y: -10 }}
                           className="p-4"
                         >
-                           <ArenaAnalytics participants={arenaParticipants} matches={spotlightMatches} type={liveStream.event_type} />
+                           <ArenaAnalytics participants={arenaParticipants} matches={spotlightMatches} type={liveStream.event_type || ''} />
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -400,7 +395,7 @@ const Home = () => {
                   
                   <div className="p-4 bg-gray-950 border-t border-gray-800">
                     <Link 
-                      to={liveStream.event_type === 'davis_cup' ? "/special-events" : `/leagues/${liveStream.event_id}`}
+                      to={liveStream.event_type === 'davis_cup' ? "/special-events" : `/leagues/${liveStream.event_id || ''}`}
                       className="group flex items-center justify-between bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl transition-all shadow-lg shadow-blue-500/20"
                     >
                       <span className="text-xs font-black uppercase tracking-widest">Full Event Hub</span>

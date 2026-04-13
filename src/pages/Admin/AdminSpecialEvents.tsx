@@ -7,18 +7,17 @@ import {
   FaTrophy, 
   FaArrowLeft, 
   FaTrash, 
-  FaUserPlus, 
   FaSave,
   FaCogs,
   FaCheckCircle,
   FaSkull,
   FaPlay,
   FaEdit,
-  FaMedal
+  FaTimes
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
-import type { DCTournament, DCTeam, DCTeamPlayer, User } from '../../lib/supabase';
+import type { DCTournament, DCTeam, User } from '../../lib/supabase';
 import AdminLayout from '../../components/Admin/AdminLayout';
 
 // Mock interface addition for local state until supabase.ts is refreshed
@@ -336,7 +335,7 @@ const AdminSpecialEvents = () => {
      }
   };
 
-  const handleSwapPlayers = (match: DCMatch) => {
+  const handleSwapPlayers = () => {
      if (!scoringMatch) return;
      setScoringMatch({
         ...scoringMatch,
@@ -912,7 +911,7 @@ const AdminSpecialEvents = () => {
                      {/* Lineup Selection Section */}
                      <div className="grid md:grid-cols-2 gap-4 p-4 bg-gray-900/50 rounded-xl border border-gray-800 relative">
                         <button 
-                          onClick={() => handleSwapPlayers(scoringMatch)}
+                          onClick={handleSwapPlayers}
                           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 p-2 bg-gray-800 text-blue-400 rounded-full border border-gray-700 hover:bg-blue-600 hover:text-white transition shadow-xl"
                           title="Swap Team Positions"
                         >
