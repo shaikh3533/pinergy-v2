@@ -67,7 +67,8 @@ const LeagueStandings = () => {
     const finalMatch = (matchesData || []).find((m: any) => m.match_type === 'final' && m.winner_id);
     const thirdPlaceMatch = (matchesData || []).find((m: any) => m.match_type === 'third_place' && m.winner_id);
 
-    if (finalMatch && leagueData && ['knockouts', 'completed'].includes(leagueData.status)) {
+    // If a completed final exists, show final standings regardless of league.status (admins sometimes forget to switch status)
+    if (finalMatch) {
       // Build final standings from knockout results: 1st, 2nd, 3rd, 4th, then rest by round robin
       const finalWinnerId = finalMatch.winner_id;
       const finalLoserId = finalMatch.player1_id === finalWinnerId ? finalMatch.player2_id : finalMatch.player1_id;
@@ -186,6 +187,131 @@ const LeagueStandings = () => {
     );
   }
 
+
+  const renderStandingsTable = (tableStandings: StandingPlayer[], title?: string) => (
+    <div className="card overflow-hidden mb-6" key={title || 'standings'}>
+      {title && <h3 className="text-xl font-bold text-white mb-4 px-4 pt-4">{title}</h3>}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-800">
+              <th className="text-left py-4 px-4 text-gray-400 font-semibold">#</th>
+              <th className="text-left py-4 px-4 text-gray-400 font-semibold">Player</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">P</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">W</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">L</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">PF</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">PA</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">PD</th>
+              <th className="text-center py-4 px-4 text-gray-400 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableStandings.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="text-center py-12 text-gray-400">
+                  No standings available yet. Matches need to be played first.
+                </td>
+              </tr>
+            ) : (
+              tableStandings.map((player, index) => {
+                const rank = index + 1;
+                const isQualified = league && rank <= league.top_qualifiers;
+                
+                return (
+                  <motion.tr
+                    key={player.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`border-b border-gray-800 ${
+                      isQualified ? 'bg-green-900/10' : ''
+                    } hover:bg-gray-800/50 transition`}
+                  >
+                    {/* Rank */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center justify-center w-8 h-8">
+                        {getRankBadge(rank)}
+                      </div>
+                    </td>
+                    
+                    {/* Player Name */}
+                    <td className="py-4 px-4">
+                      <div className="font-semibold text-white">{player.player.name}</div>
+                      <div className="text-xs text-gray-500">{player.player.level}</div>
+                    </td>
+                    
+                    {/* Played */}
+                    <td className="py-4 px-4 text-center text-gray-300">
+                      {player.matches_played}
+                    </td>
+                    
+                    {/* Wins */}
+                    <td className="py-4 px-4 text-center">
+                      <span className="text-green-400 font-semibold">{player.wins}</span>
+                    </td>
+                    
+                    {/* Losses */}
+                    <td className="py-4 px-4 text-center">
+                      <span className="text-red-400">{player.losses}</span>
+                    </td>
+                    
+                    {/* Points For */}
+                    <td className="py-4 px-4 text-center text-gray-300">
+                      {player.points_for}
+                    </td>
+                    
+                    {/* Points Against */}
+                    <td className="py-4 px-4 text-center text-gray-300">
+                      {player.points_against}
+                    </td>
+                    
+                    {/* Point Difference */}
+                    <td className="py-4 px-4 text-center">
+                      <span className={`font-semibold flex items-center justify-center gap-1 ${
+                        player.point_difference > 0 
+                          ? 'text-green-400' 
+                          : player.point_difference < 0 
+                          ? 'text-red-400' 
+                          : 'text-gray-400'
+                      }`}>
+                        {player.point_difference > 0 ? (
+                          <FaChevronUp className="text-xs" />
+                        ) : player.point_difference < 0 ? (
+                          <FaChevronDown className="text-xs" />
+                        ) : (
+                          <FaMinus className="text-xs" />
+                        )}
+                        {player.point_difference > 0 ? '+' : ''}{player.point_difference}
+                      </span>
+                    </td>
+                    
+                    {/* Qualification Status */}
+                    <td className="py-4 px-4 text-center">
+                      {getQualificationStatus(rank)}
+                    </td>
+                  </motion.tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Legend */}
+      <div className="p-4 bg-gray-800/50 border-t border-gray-700">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+          <span><strong>P</strong> = Played</span>
+          <span><strong>W</strong> = Wins</span>
+          <span><strong>L</strong> = Losses</span>
+          <span><strong>PF</strong> = Points For</span>
+          <span><strong>PA</strong> = Points Against</span>
+          <span><strong>PD</strong> = Point Difference</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-6xl mx-auto">
@@ -253,127 +379,15 @@ const LeagueStandings = () => {
             </div>
           )}
 
-          {/* Standings Table */}
-          <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-800">
-                    <th className="text-left py-4 px-4 text-gray-400 font-semibold">#</th>
-                    <th className="text-left py-4 px-4 text-gray-400 font-semibold">Player</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">P</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">W</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">L</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">PF</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">PA</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">PD</th>
-                    <th className="text-center py-4 px-4 text-gray-400 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {standings.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="text-center py-12 text-gray-400">
-                        No standings available yet. Matches need to be played first.
-                      </td>
-                    </tr>
-                  ) : (
-                    standings.map((player, index) => {
-                      const rank = index + 1;
-                      const isQualified = league && rank <= league.top_qualifiers;
-                      
-                      return (
-                        <motion.tr
-                          key={player.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`border-b border-gray-800 ${
-                            isQualified ? 'bg-green-900/10' : ''
-                          } hover:bg-gray-800/50 transition`}
-                        >
-                          {/* Rank */}
-                          <td className="py-4 px-4">
-                            <div className="flex items-center justify-center w-8 h-8">
-                              {getRankBadge(rank)}
-                            </div>
-                          </td>
-                          
-                          {/* Player Name */}
-                          <td className="py-4 px-4">
-                            <div className="font-semibold text-white">{player.player.name}</div>
-                            <div className="text-xs text-gray-500">{player.player.level}</div>
-                          </td>
-                          
-                          {/* Played */}
-                          <td className="py-4 px-4 text-center text-gray-300">
-                            {player.matches_played}
-                          </td>
-                          
-                          {/* Wins */}
-                          <td className="py-4 px-4 text-center">
-                            <span className="text-green-400 font-semibold">{player.wins}</span>
-                          </td>
-                          
-                          {/* Losses */}
-                          <td className="py-4 px-4 text-center">
-                            <span className="text-red-400">{player.losses}</span>
-                          </td>
-                          
-                          {/* Points For */}
-                          <td className="py-4 px-4 text-center text-gray-300">
-                            {player.points_for}
-                          </td>
-                          
-                          {/* Points Against */}
-                          <td className="py-4 px-4 text-center text-gray-300">
-                            {player.points_against}
-                          </td>
-                          
-                          {/* Point Difference */}
-                          <td className="py-4 px-4 text-center">
-                            <span className={`font-semibold flex items-center justify-center gap-1 ${
-                              player.point_difference > 0 
-                                ? 'text-green-400' 
-                                : player.point_difference < 0 
-                                ? 'text-red-400' 
-                                : 'text-gray-400'
-                            }`}>
-                              {player.point_difference > 0 ? (
-                                <FaChevronUp className="text-xs" />
-                              ) : player.point_difference < 0 ? (
-                                <FaChevronDown className="text-xs" />
-                              ) : (
-                                <FaMinus className="text-xs" />
-                              )}
-                              {player.point_difference > 0 ? '+' : ''}{player.point_difference}
-                            </span>
-                          </td>
-                          
-                          {/* Qualification Status */}
-                          <td className="py-4 px-4 text-center">
-                            {getQualificationStatus(rank)}
-                          </td>
-                        </motion.tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Legend */}
-            <div className="p-4 bg-gray-800/50 border-t border-gray-700">
-              <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                <span><strong>P</strong> = Played</span>
-                <span><strong>W</strong> = Wins</span>
-                <span><strong>L</strong> = Losses</span>
-                <span><strong>PF</strong> = Points For</span>
-                <span><strong>PA</strong> = Points Against</span>
-                <span><strong>PD</strong> = Point Difference</span>
-              </div>
-            </div>
-          </div>
+          {/* Standings Tables */}
+          {league?.league_type === 'group_stage_knockouts' && !isFinalStandings ? (
+            Array.from(new Set(standings.map(s => s.group_number).filter(Boolean))).sort().map(groupNum => {
+              const groupStandings = standings.filter(s => s.group_number === groupNum);
+              return renderStandingsTable(groupStandings, `Group ${String.fromCharCode(64 + Number(groupNum))}`);
+            })
+          ) : (
+            renderStandingsTable(standings)
+          )}
 
           {/* Top 4 Bracket Preview (if in knockouts) */}
           {league?.status === 'knockouts' && standings.length >= 4 && (

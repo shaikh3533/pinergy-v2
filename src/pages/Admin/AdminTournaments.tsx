@@ -173,7 +173,11 @@ const AdminTournaments = () => {
 
     if (error) {
       console.error('Error creating league:', error);
-      toast.error('Failed to create league');
+      if ((error as any).code === '23514') {
+        toast.error('Database schema needs migration for this tournament type. Run database/MIGRATION_FIX_LEAGUE_TYPE_CONSTRAINT.sql in Supabase SQL editor.');
+      } else {
+        toast.error(error.message || 'Failed to create league');
+      }
     } else {
       toast.success(`League "${formData.name}" created successfully!`);
       setFormData({

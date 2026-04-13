@@ -7,12 +7,20 @@ import { clearPricingCache } from '../../utils/pricingCalculator';
 
 const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState<'pricing' | 'tables'>('pricing');
+  const [activeSection, setActiveSection] = useState<'pricing' | 'tables' | 'stream'>('pricing');
   
   // Pricing state
   const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceInput, setPriceInput] = useState<number>(0);
+  
+  // Stream config
+  const [streamUrl, setStreamUrl] = useState('');
+  const [streamTitle, setStreamTitle] = useState('');
+  const [streamEventId, setStreamEventId] = useState('');
+  const [streamEventType, setStreamEventType] = useState<'standard' | 'davis_cup'>('standard');
+  const [availableData, setAvailableData] = useState<any[]>([]);
+  const [loadingStream, setLoadingStream] = useState(false);
   
   // Table names state
   const [tables, setTables] = useState<TableName[]>([]);
@@ -51,6 +59,29 @@ const AdminSettings = () => {
 
       if (tableError) throw tableError;
       setTables(tableData || []);
+
+      // Fetch Events for scoreboard selection
+      const { data: leagues } = await supabase.from('leagues').select('id, name').order('created_at', { ascending: false });
+      const { data: dc } = await supabase.from('dc_tournaments').select('id, name').order('created_at', { ascending: false });
+      
+      const allEvents = [
+        ...(leagues || []).map(l => ({ id: l.id, name: l.name, type: 'standard' })),
+        ...(dc || []).map(d => ({ id: d.id, name: d.name, type: 'davis_cup' }))
+      ];
+      setAvailableData(allEvents);
+
+      // Fetch live stream link
+      const { data: streamData } = await supabase
+        .from('club_settings')
+        .select('*')
+        .eq('setting_key', 'live_stream')
+        .maybeSingle();
+      if (streamData && streamData.setting_value) {
+        setStreamUrl(streamData.setting_value.url || '');
+        setStreamTitle(streamData.setting_value.title || '');
+        setStreamEventId(streamData.setting_value.event_id || '');
+        setStreamEventType(streamData.setting_value.event_type || 'standard');
+      }
     } catch (error) {
       console.error('Error fetching settings:', error);
       toast.error('Failed to load settings');
@@ -127,6 +158,36 @@ const AdminSettings = () => {
     setTableForm({ display_name: '', full_name: '', specs: '' });
   };
 
+  // Save Live stream
+  const handleSaveStream = async () => {
+    setLoadingStream(true);
+    try {
+      const { data: existing } = await supabase
+        .from('club_settings')
+        .select('id')
+        .eq('setting_key', 'live_stream')
+        .maybeSingle();
+
+      const payload = {
+        setting_key: 'live_stream',
+        setting_value: { url: streamUrl, title: streamTitle, event_id: streamEventId, event_type: streamEventType },
+        updated_at: new Date().toISOString()
+      };
+
+      if (existing) {
+        await supabase.from('club_settings').update(payload).eq('id', existing.id);
+      } else {
+        await supabase.from('club_settings').insert(payload);
+      }
+      toast.success('Live stream updated! 🎥');
+    } catch (error) {
+      console.error('Error saving stream:', error);
+      toast.error('Failed to save stream settings');
+    } finally {
+      setLoadingStream(false);
+    }
+  };
+
   // Helper functions
   const getTableDisplayName = (tableId: string) => {
     const table = tables.find(t => t.table_id === tableId);
@@ -168,6 +229,16 @@ const AdminSettings = () => {
               }`}
             >
               💰 Pricing Rules
+            </button>
+            <button
+              onClick={() => setActiveSection('stream')}
+              className={`px-6 py-3 rounded-lg font-semibold transition ${
+                activeSection === 'stream'
+                  ? 'bg-primary-blue text-white'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              }`}
+            >
+              🎥 Live Stream
             </button>
             <button
               onClick={() => setActiveSection('tables')}
@@ -272,6 +343,72 @@ const AdminSettings = () => {
             </div>
           )}
 
+          {/* Stream Section */}
+          {activeSection === 'stream' && (
+            <div className="card">
+              <h2 className="text-2xl font-bold text-white mb-6">Homepage Live Stream</h2>
+              <p className="text-gray-400 mb-6">
+                Add a YouTube ID (e.g. dQw4w9WgXcQ) to show a live Spinergy match directly on the homepage.
+              </p>
+              
+              <div className="space-y-4 max-w-xl">
+                <div>
+                  <label className="label">Stream Title (e.g. "Knockout Final")</label>
+                  <input
+                    type="text"
+                    value={streamTitle}
+                    onChange={(e) => setStreamTitle(e.target.value)}
+                    className="input-field"
+                    placeholder="Grand Final 2026..."
+                  />
+                </div>
+                <div>
+                  <label className="label">YouTube Video ID</label>
+                  <input
+                    type="text"
+                    value={streamUrl}
+                    onChange={(e) => setStreamUrl(e.target.value)}
+                    className="input-field"
+                    placeholder="dQw4w9WgXcQ"
+                  />
+                  <p className="text-xs text-blue-400 mt-2">To disable the stream, just leave this input completely blank and save.</p>
+                </div>
+                <div>
+                  <label className="label">Link Active Scorecard Data</label>
+                  <select
+                    className="input-field"
+                    value={`${streamEventType}::${streamEventId}`}
+                    onChange={(e) => {
+                      if (!e.target.value) {
+                         setStreamEventId('');
+                         return;
+                      }
+                      const [type, id] = e.target.value.split('::');
+                      setStreamEventType(type as any);
+                      setStreamEventId(id);
+                    }}
+                  >
+                    <option value="">None (Static Watermark)</option>
+                    {availableData.map(ev => (
+                       <option key={ev.id} value={`${ev.type}::${ev.id}`}>
+                         [{ev.type === 'standard' ? 'Normal' : 'Davis Cup'}] {ev.name}
+                       </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-400 mt-2">The live telemetry panel on the homepage will pull the latest 3 matches from the selected event.</p>
+                </div>
+                
+                <button
+                  onClick={handleSaveStream}
+                  disabled={loadingStream}
+                  className="btn-primary"
+                >
+                  {loadingStream ? 'Saving...' : 'Save Broadcast Overlay'}
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Tables Section */}
           {activeSection === 'tables' && (
             <div className="card">

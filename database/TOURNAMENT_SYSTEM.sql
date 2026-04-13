@@ -11,13 +11,13 @@ CREATE TABLE IF NOT EXISTS leagues (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   league_type TEXT NOT NULL DEFAULT 'round_robin_knockouts' 
-    CHECK (league_type IN ('round_robin_knockouts', 'round_robin', 'knockouts')),
+    CHECK (league_type IN ('round_robin', 'round_robin_knockouts', 'group_stage_knockouts', 'single_elimination', 'double_elimination')),
   schedule_days TEXT[] NOT NULL DEFAULT ARRAY['Saturday', 'Sunday'],
   frequency TEXT DEFAULT 'weekly', -- weekly, bi-weekly, monthly
   start_date DATE,
   end_date DATE,
   status TEXT NOT NULL DEFAULT 'upcoming' 
-    CHECK (status IN ('upcoming', 'registration', 'round_robin', 'knockouts', 'completed', 'cancelled')),
+    CHECK (status IN ('upcoming', 'registration', 'group_stage', 'round_robin', 'knockouts', 'completed', 'cancelled')),
   rules TEXT, -- Custom rules text
   max_players INTEGER DEFAULT 16,
   round_robin_sets INTEGER DEFAULT 1, -- Best of 1 for round robin

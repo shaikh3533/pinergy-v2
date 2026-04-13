@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FaEdit, FaTimes, FaSave, FaSearch, FaTrash, FaPlus, FaKey, FaEnvelope } from 'react-icons/fa';
+import { FaEdit, FaTimes, FaSave, FaSearch, FaTrash, FaPlus, FaKey, FaEnvelope, FaUser } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { User } from '../../lib/supabase';
 import { getLevelBadgeColor, calculateLevel } from '../../utils/ratingSystem';
@@ -344,6 +345,13 @@ const AdminUsers = () => {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex gap-2">
+                        <Link
+                          to={`/players/${user.id}`}
+                          className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                          title="View player portfolio"
+                        >
+                          <FaUser />
+                        </Link>
                         <button
                           onClick={() => openEditModal(user)}
                           className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"

@@ -26,6 +26,9 @@ import LeagueDetail from './pages/Leagues/LeagueDetail';
 import LeagueMatches from './pages/Leagues/LeagueMatches';
 import LeagueStandings from './pages/Leagues/LeagueStandings';
 import GlobalRankings from './pages/Leagues/GlobalRankings';
+import SpecialEvents from './pages/SpecialEvents/SpecialEvents';
+
+import PlayerPortfolio from './pages/Players/PlayerPortfolio';
 
 // Admin Pages (New)
 import AdminDashboard from './pages/Admin/AdminDashboard';
@@ -36,6 +39,8 @@ import AdminTournamentsPage from './pages/Admin/AdminTournamentsPage';
 import AdminGallery from './pages/Admin/AdminGallery';
 import AdminAdsPage from './pages/Admin/AdminAdsPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
+import AdminSpecialEvents from './pages/Admin/AdminSpecialEvents';
+
 import AdminCoaches from './pages/Admin/AdminCoaches';
 import AdminStore from './pages/Admin/AdminStore';
 import AdminReceipt from './pages/Admin/AdminReceipt';
@@ -100,6 +105,8 @@ function App() {
           <Route element={<Layout><LeagueMatches /></Layout>} path="/leagues/:leagueId/matches" />
           <Route element={<Layout><LeagueStandings /></Layout>} path="/leagues/:leagueId/standings" />
           <Route element={<Layout><GlobalRankings /></Layout>} path="/rankings" />
+          <Route element={<Layout><PlayerPortfolio /></Layout>} path="/players/:playerId" />
+          <Route element={<Layout><SpecialEvents /></Layout>} path="/special-events" />
           
           {/* User Dashboard (with Layout) */}
           <Route
@@ -151,6 +158,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminTournamentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/special-events"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminSpecialEvents />
               </ProtectedRoute>
             }
           />

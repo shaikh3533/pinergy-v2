@@ -458,3 +458,97 @@ export interface Order {
   created_at: string;
   updated_at: string;
 }
+
+// ================================================================
+// DAVIS CUP / SPECIAL EVENTS TYPES
+// ================================================================
+
+export interface DCTournament {
+  id: string;
+  name: string;
+  date?: string;
+  status: LeagueStatus;
+  group_stage_rubbers: number;
+  knockout_rubbers: number;
+  num_groups: number;
+  qualifiers_per_group: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DCTeam {
+  id: string;
+  tournament_id: string;
+  name: string;
+  group_number?: number;
+  seed_number?: number;
+  wins: number;
+  losses: number;
+  rubbers_won: number;
+  rubbers_lost: number;
+  sets_won: number;
+  sets_lost: number;
+  points_for: number;
+  points_against: number;
+  created_at: string;
+  players?: DCTeamPlayer[];
+}
+
+export interface DCTeamPlayer {
+  id: string;
+  team_id: string;
+  player_id: string;
+  created_at: string;
+  player?: User;
+}
+
+export interface DCTie {
+  id: string;
+  tournament_id: string;
+  team1_id: string;
+  team2_id: string;
+  winner_id?: string;
+  tie_type: MatchType;
+  group_number?: number;
+  bracket_position?: string;
+  status: MatchStatus;
+  team1_rubbers_won: number;
+  team2_rubbers_won: number;
+  created_at: string;
+  team1?: DCTeam;
+  team2?: DCTeam;
+  winner?: DCTeam;
+  matches?: DCMatch[];
+}
+
+export interface DCMatch {
+  id: string;
+  tie_id: string;
+  match_number: number;
+  rubber_type: 'singles' | 'doubles';
+  status: MatchStatus;
+  team1_player1_id?: string;
+  team1_player2_id?: string;
+  team2_player1_id?: string;
+  team2_player2_id?: string;
+  sets_to_win: number;
+  team1_sets_won: number;
+  team2_sets_won: number;
+  winner_team_id?: string;
+  created_at: string;
+  team1_player1?: User;
+  team1_player2?: User;
+  team2_player1?: User;
+  team2_player2?: User;
+  sets?: DCMatchSet[];
+}
+
+export interface DCMatchSet {
+  id: string;
+  match_id: string;
+  set_number: number;
+  team1_score: number;
+  team2_score: number;
+  winner_team_id?: string;
+  created_at: string;
+}

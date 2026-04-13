@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import { supabase } from '../../lib/supabase';
 import type { PlayerTournamentStats, User } from '../../lib/supabase';
+import { ratingPointsFromFinalRank } from '../../utils/tournamentRatingPoints';
 
 interface RankedPlayer extends PlayerTournamentStats {
   player: User;
@@ -21,36 +22,42 @@ const GlobalRankings = () => {
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'all' | '30' | '90'>('all');
 
   useEffect(() => {
     fetchRankings();
-  }, []);
+  }, [timeFilter]);
+
+
 
   const fetchRankings = async () => {
     setLoading(true);
     
-    // Fetch from the global_player_rankings view
-    const { data, error } = await supabase
-      .from('player_tournament_stats')
-      .select('*, player:player_id(*)')
-      .order('rating_points', { ascending: false });
+    if (timeFilter === 'all') {
+      const { data, error } = await supabase
+        .from('player_tournament_stats')
+        .select('*, player:player_id(*)')
+        .order('rating_points', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching rankings:', error);
-      // If view doesn't exist, try fetching directly
-      await fetchDirectRankings();
-    } else {
-      // Add rank number
-      const rankedPlayers = (data || []).map((p, index) => ({
-        ...p,
-        global_rank: index + 1,
-      }));
-      setPlayers(rankedPlayers);
+      if (error) {
+        console.error('Error fetching rankings:', error);
+        await fetchDirectRankingsAllTime();
+      } else {
+        const rankedPlayers = (data || []).map((p, index) => ({
+          ...p,
+          global_rank: index + 1,
+        }));
+        setPlayers(rankedPlayers);
+      }
+      setLoading(false);
+      return;
     }
+
+    await fetchDirectRankingsWindow(parseInt(timeFilter, 10));
     setLoading(false);
   };
 
-  const fetchDirectRankings = async () => {
+  const fetchDirectRankingsAllTime = async () => {
     // Fallback: Calculate rankings from league_players
     const { data: leaguePlayers } = await supabase
       .from('league_players')
@@ -97,11 +104,7 @@ const GlobalRankings = () => {
 
       // Calculate rating based on final_rank
       if (lp.final_rank) {
-        stats.rating_points += 5; // Participation
-        if (lp.final_rank <= 6) stats.rating_points += 5;
-        if (lp.final_rank <= 4) stats.rating_points += 5;
-        if (lp.final_rank === 2) stats.rating_points += 5;
-        if (lp.final_rank === 1) stats.rating_points += 10;
+        stats.rating_points += ratingPointsFromFinalRank(lp.final_rank);
         
         if (lp.final_rank === 1) stats.total_championships++;
         if (lp.final_rank === 2) stats.total_runner_ups++;
@@ -123,6 +126,90 @@ const GlobalRankings = () => {
       })
       .sort((a, b) => {
         // Sort by rating points, then win percentage, then point difference
+        if (b.rating_points !== a.rating_points) return b.rating_points - a.rating_points;
+        if (b.win_percentage !== a.win_percentage) return b.win_percentage - a.win_percentage;
+        return b.avg_point_difference - a.avg_point_difference;
+      })
+      .map((p, index) => ({ ...p, global_rank: index + 1 }));
+
+    setPlayers(rankedPlayers);
+  };
+
+  const fetchDirectRankingsWindow = async (days: number) => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffIso = cutoff.toISOString().slice(0, 10);
+
+    const { data: leaguePlayers } = await supabase
+      .from('league_players')
+      .select(`
+        *,
+        player:player_id(*),
+        league:league_id(status, date)
+      `)
+      .eq('league.status', 'completed')
+      .gte('league.date', cutoffIso);
+
+    if (!leaguePlayers) {
+      setPlayers([]);
+      return;
+    }
+
+    const playerStats: { [id: string]: RankedPlayer } = {};
+    leaguePlayers.forEach((lp: any) => {
+      const playerId = lp.player_id;
+      if (!playerStats[playerId]) {
+        playerStats[playerId] = {
+          id: playerId,
+          player_id: playerId,
+          player: lp.player,
+          total_leagues_played: 0,
+          total_matches_played: 0,
+          total_wins: 0,
+          total_losses: 0,
+          total_points_for: 0,
+          total_points_against: 0,
+          total_point_difference: 0,
+          total_championships: 0,
+          total_runner_ups: 0,
+          total_top_4_finishes: 0,
+          total_top_6_finishes: 0,
+          rating_points: 0,
+          win_percentage: 0,
+          avg_point_difference: 0,
+          updated_at: '',
+          global_rank: 0,
+        };
+      }
+
+      const stats = playerStats[playerId];
+      stats.total_leagues_played++;
+      stats.total_wins += lp.wins || 0;
+      stats.total_losses += lp.losses || 0;
+      stats.total_points_for += lp.points_for || 0;
+      stats.total_points_against += lp.points_against || 0;
+      stats.total_point_difference += lp.point_difference || 0;
+
+      if (lp.final_rank) {
+        stats.rating_points += ratingPointsFromFinalRank(lp.final_rank);
+        if (lp.final_rank === 1) stats.total_championships++;
+        if (lp.final_rank === 2) stats.total_runner_ups++;
+        if (lp.final_rank <= 4) stats.total_top_4_finishes++;
+        if (lp.final_rank <= 6) stats.total_top_6_finishes++;
+      }
+    });
+
+    const rankedPlayers = Object.values(playerStats)
+      .map(p => {
+        const totalMatches = p.total_wins + p.total_losses;
+        return {
+          ...p,
+          total_matches_played: totalMatches,
+          win_percentage: totalMatches > 0 ? Math.round((p.total_wins / totalMatches) * 100) : 0,
+          avg_point_difference: totalMatches > 0 ? Math.round(p.total_point_difference / totalMatches) : 0,
+        };
+      })
+      .sort((a, b) => {
         if (b.rating_points !== a.rating_points) return b.rating_points - a.rating_points;
         if (b.win_percentage !== a.win_percentage) return b.win_percentage - a.win_percentage;
         return b.avg_point_difference - a.avg_point_difference;
@@ -196,16 +283,47 @@ const GlobalRankings = () => {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-6">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search players..."
-              className="input-field pl-10"
-            />
+          {/* Filters + Search */}
+          <div className="card mb-6">
+            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => setTimeFilter('all')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    timeFilter === 'all' ? 'bg-primary-blue text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  }`}
+                >
+                  All Time
+                </button>
+                <button
+                  onClick={() => setTimeFilter('30')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    timeFilter === '30' ? 'bg-primary-blue text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  }`}
+                >
+                  Last 30 Days
+                </button>
+                <button
+                  onClick={() => setTimeFilter('90')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                    timeFilter === '90' ? 'bg-primary-blue text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  }`}
+                >
+                  Last 90 Days
+                </button>
+              </div>
+
+              <div className="relative max-w-md w-full">
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search players..."
+                  className="input-field pl-10"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Top 3 Podium */}
